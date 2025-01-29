@@ -39,6 +39,7 @@ class RigidCircle {
 public:
     Vector2 prevPos;
     Vector2 pos;
+    Vector2 projectedVel;
 
     Vector2 cumulativeImpulse;
 
@@ -46,11 +47,14 @@ public:
     float mass;
 
 public:
-    RigidCircle() {}
+    RigidCircle() {
+        projectedVel = { 0.f, 0.f };
+    }
 
     RigidCircle(Vector2 _pos, float _radius, float _mass) {
         prevPos = _pos;
         pos = _pos;
+        projectedVel = { 0.f, 0.f };
 
         cumulativeImpulse = { 0.f, 0.f };
 
@@ -176,7 +180,7 @@ public:
 
 class Simulation {
 private:
-    Vector2 gravity = { 0.f, 100.f };
+    Vector2 gravity;
 
     RigidCircle circles[64];
     StaticRect rects[64];
@@ -186,13 +190,18 @@ private:
 
 public:
     Simulation() {
+        gravity = { 0.f, 200.f };
+
         rigidBodyCount = 0;
         staticBodyCount = 0;
 
         circles[0] = RigidCircle({ 900.f, 100.f }, 25.f, 10.f);
         rigidBodyCount++;
 
-        rects[0] = StaticRect({900.f, 600.f}, 400.f, 50.f, -43.f);
+        rects[0] = StaticRect({700.f, 400.f}, 300.f, 50.f, 43.f);
+        staticBodyCount++;
+
+        rects[1] = StaticRect({ 1100.f, 600.f }, 300.f, 50.f, -43.f);
         staticBodyCount++;
     }
 
@@ -200,11 +209,13 @@ public:
         for (int i = 0; i < rigidBodyCount; i++) {
             RigidCircle& circle = circles[i];
 
-            Vector2 circleVel = circle.pos - circle.prevPos; // fix later?
+            //Vector2 circleVel = circle.pos - circle.prevPos; // fix later?
             circle.prevPos = circle.pos;
-            circle.pos += circleVel;
+            circle.pos += circle.projectedVel * DeltaTime;
 
             circle.pos += gravity * DeltaTime * DeltaTime;
+
+            
 
             if (circle.GetPos().y > 900 - circle.GetRadius()) {
                 Vector2 vel = (circle.pos - circle.prevPos) * (1 / DeltaTime);
@@ -248,6 +259,8 @@ public:
 
             circle.pos += circle.cumulativeImpulse * (1 / circle.mass) * DeltaTime;
             circle.cumulativeImpulse = { 0.f, 0.f };
+
+            circle.projectedVel = (circle.pos - circle.prevPos) * (1/DeltaTime);
         }
     }
 
@@ -276,9 +289,13 @@ int main() {
         // Updates
         float DeltaTime = GetFrameTime();
 
+        
+
         Vector2 mouse = GetMousePosition();
 
-        sim.Step(DeltaTime);
+        if (DeltaTime > 0) {
+            sim.Step(DeltaTime);
+        }
         
         // Drawing
         BeginDrawing();
