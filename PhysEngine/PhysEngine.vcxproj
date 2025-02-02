@@ -141,20 +141,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="HuffmanTable.cpp" />
-    <ClCompile Include="HuffmanTree.cpp" />
-    <ClCompile Include="ImgurRequest.cpp" />
-    <ClCompile Include="JPEG.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="QuantTable.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="rlshort.cpp" />
+    <ClCompile Include="Simulation.cpp" />
+    <ClCompile Include="StaticBody.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BitStream.h" />
-    <ClInclude Include="HuffmanTable.h" />
-    <ClInclude Include="HuffmanTree.h" />
-    <ClInclude Include="ImgurRequest.h" />
-    <ClInclude Include="JPEG.h" />
-    <ClInclude Include="QuantTable.h" />
+    <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="rlshort.h" />
+    <ClInclude Include="Simulation.h" />
+    <ClInclude Include="StaticBody.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

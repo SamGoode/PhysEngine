@@ -18,39 +18,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImgurRequest.cpp">
+    <ClCompile Include="Simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HuffmanTable.cpp">
+    <ClCompile Include="RigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HuffmanTree.cpp">
+    <ClCompile Include="StaticBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JPEG.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QuantTable.cpp">
+    <ClCompile Include="rlshort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ImgurRequest.h">
+    <ClInclude Include="Simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HuffmanTable.h">
+    <ClInclude Include="RigidBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HuffmanTree.h">
+    <ClInclude Include="StaticBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JPEG.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QuantTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BitStream.h">
+    <ClInclude Include="rlshort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
