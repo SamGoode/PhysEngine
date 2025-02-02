@@ -10,6 +10,7 @@
 
 StaticCircle::StaticCircle(Vector2 _pos, float _radius) {
     pos = _pos;
+    rotation = 0.f;
     radius = _radius;
 }
 
@@ -25,7 +26,7 @@ bool StaticCircle::CheckCollision(const RigidCircle& circle, CollisionInfo& resu
 }
 
 void StaticCircle::Draw() {
-    DrawCircle(pos.x, pos.y, radius, BLUE);
+    DrawCircle(pos.x, pos.y, radius, GREEN);
 }
 
 void StaticCircle::Draw(Color color) {

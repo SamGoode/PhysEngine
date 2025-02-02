@@ -13,13 +13,15 @@ private:
     Vector2 gravity;
 
     RigidCircle circles[64];
-    StaticRect rects[64];
+    StaticBody* statics[64];
 
     int rigidBodyCount;
     int staticBodyCount;
 
 public:
     Simulation();
+
+    ~Simulation();
 
     void InitialStep(float DeltaTime);
 
