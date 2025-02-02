@@ -148,6 +148,7 @@
     <ClCompile Include="StaticBody.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionInfo.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="rlshort.h" />
     <ClInclude Include="Simulation.h" />

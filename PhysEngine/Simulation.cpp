@@ -2,6 +2,7 @@
 
 #include "rlshort.h"
 
+#include "CollisionInfo.h"
 
 Simulation::Simulation() {
     boundary = { 0.f, 0.f, 1800.f, 900.f };
@@ -10,7 +11,7 @@ Simulation::Simulation() {
     rigidBodyCount = 0;
     staticBodyCount = 0;
 
-    circles[0] = RigidCircle({ 650.f, 100.f }, 25.f, 10.f);
+    circles[0] = RigidCircle({ 620.f, 100.f }, 25.f, 10.f);
     rigidBodyCount++;
 
     rects[0] = StaticRect({ 700.f, 400.f }, 300.f, 50.f, 45.f);
@@ -60,38 +61,17 @@ void Simulation::Step(float DeltaTime) {
         }
 
         for (int n = 0; n < staticBodyCount; n++) {
-            Vector2 collisionNormal;
+            CollisionInfo collision;
 
             StaticRect& rect = rects[n];
 
-            bool isColliding = rect.CheckCollision(circle, collisionNormal);
-
-            if (!isColliding) {
+            if (!rect.CheckCollision(circle, collision)) {
                 continue;
             }
 
-            Vector2 toCircle = circle.GetPos() - rect.GetPos();
-            toCircle = Vector2Rotate(toCircle, -rect.GetRotation() * PI / 180);
+            circle.pos = collision.impact;
 
-            if (collisionNormal.x == 0) {
-                toCircle.y = (circle.GetRadius() + rect.GetHeight() / 2) * collisionNormal.y;
-            }
-            else if (collisionNormal.y == 0) {
-                toCircle.x = (circle.GetRadius() + rect.GetWidth() / 2) * collisionNormal.x;
-            }
-            else {
-                Vector2 corner = { rect.width / 2, rect.height / 2 };
-
-                if (toCircle.x < 0) { corner.x *= -1; }
-                if (toCircle.y < 0) { corner.y *= -1; }
-
-                toCircle = corner + collisionNormal * circle.radius;
-            }
-
-            toCircle = Vector2Rotate(toCircle, rect.GetRotation() * PI / 180);
-            circle.pos = rect.pos + toCircle;
-
-            Vector2 worldNormal = Vector2Rotate(collisionNormal, rect.GetRotation() * PI / 180);
+            Vector2 worldNormal = Vector2Rotate(collision.normal, rect.GetRotation() * PI / 180);
             Vector2 velocityNormal = worldNormal * Vector2DotProduct(velHalfStep, worldNormal);
             acceleration += (velocityNormal * -2) * (2 / DeltaTime);
         }
