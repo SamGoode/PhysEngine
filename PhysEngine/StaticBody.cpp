@@ -1,5 +1,6 @@
 #include "StaticBody.h"
 
+#include <cmath>
 #include "rlshort.h"
 
 #include "RigidBody.h"
@@ -18,6 +19,26 @@ bool StaticRect::CheckCollision(const RigidCircle& circle, Vector2& normal) {
     float radius = circle.GetRadius();
 
     toCircle = Vector2Rotate(toCircle, -rotation * PI / 180);
+
+    normal = { 0.f, 0.f };
+
+    if (!(abs(toCircle.x) < width / 2 + radius && abs(toCircle.y) < height / 2 + radius)) {
+        return false;
+    }
+
+    if (abs(toCircle.x) > width / 2 && abs(toCircle.y) > height / 2) {
+        Vector2 corner = { width / 2, height / 2 };
+
+        if (toCircle.x < 0) { corner.x *= -1; }
+        if (toCircle.y < 0) { corner.y *= -1; }
+
+        if (Vector2DistanceSqr(corner, toCircle) > radius * radius) {
+            return false;
+        }
+
+        normal = Vector2Normalize(toCircle - corner);
+        return true;
+    }
 
     if (toCircle.x == 0) {
         if (toCircle.y > 0) {
@@ -44,7 +65,7 @@ bool StaticRect::CheckCollision(const RigidCircle& circle, Vector2& normal) {
         }
     }
 
-    return (abs(toCircle.x) < width / 2 + radius && abs(toCircle.y) < height / 2 + radius);
+    return true;
 }
 
 void StaticRect::Draw() {
