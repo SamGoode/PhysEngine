@@ -5,50 +5,47 @@
 #include "raymath.h"
 
 
-//class RigidBody {
-//public:
-//    Vector2 prevPos;
-//    Vector2 pos;
-//
-//    float radius;
-//    float mass;
-//
-//public:
-//    RigidCircle() {}
-//
-//    RigidCircle(struct Vector2 _pos, float _radius, float _mass);
-//
-//    const Vector2& GetPos() const { return pos; }
-//
-//    float GetRadius() const { return radius; }
-//
-//    float GetMass() { return mass; }
-//
-//    void SetPos(Vector2 newPos) { pos = newPos; }
-//
-//    void Draw();
-//};
-
-class RigidCircle {
+class RigidBody {
 public:
     Vector2 pos;
     Vector2 vel;
 
-    float radius;
     float mass;
 
 public:
-    RigidCircle() {}
-
-    RigidCircle(Vector2 _pos, float _radius, float _mass);
+    RigidBody() {}
 
     const Vector2& GetPos() const { return pos; }
-
-    float GetRadius() const { return radius; }
+    void SetPos(Vector2 newPos) { pos = newPos; }
 
     float GetMass() { return mass; }
 
-    void SetPos(Vector2 newPos) { pos = newPos; }
+    virtual void Draw() = 0;
+};
 
-    void Draw();
+
+class RigidCircle : public RigidBody {
+public:
+    float radius;
+
+public:
+    RigidCircle() {}
+    RigidCircle(Vector2 _pos, float _mass, float _radius);
+
+    float GetRadius() const { return radius; }
+
+    virtual void Draw() override;
+};
+
+class RigidRect : public RigidBody {
+public:
+    float width;
+    float height;
+    float rotation;
+
+public:
+    RigidRect() {}
+    RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation);
+
+    virtual void Draw() override;
 };

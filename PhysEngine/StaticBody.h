@@ -12,12 +12,11 @@ public:
 
 public:
     StaticBody() {}
-    StaticBody(Vector2 _pos) { pos = _pos; }
 
     const Vector2& GetPos() { return pos; }
     float GetRotation() { return rotation; }
 
-    virtual bool CheckCollision(const class RigidCircle& circle, struct CollisionInfo& result) = 0;
+    virtual bool CheckCollision(class RigidBody* body, struct CollisionInfo& result) = 0;
 
     virtual void Draw() = 0;
     virtual void Draw(class Color color) = 0;
@@ -34,7 +33,7 @@ public:
 
     float GetRadius() { return radius; }
 
-    virtual bool CheckCollision(const class RigidCircle& circle, CollisionInfo& result) override;
+    virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
 
     virtual void Draw() override;
     virtual void Draw(class Color color) override;
@@ -53,7 +52,7 @@ public:
     float GetWidth() { return width; }
     float GetHeight() { return height; }
 
-    virtual bool CheckCollision(const class RigidCircle& circle, CollisionInfo& result) override;
+    virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
 
     virtual void Draw() override;
     virtual void Draw(class Color color) override;

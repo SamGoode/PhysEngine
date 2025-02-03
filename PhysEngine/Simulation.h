@@ -12,7 +12,7 @@ private:
     Vector4 boundary;
     Vector2 gravity;
 
-    RigidCircle circles[64];
+    RigidBody* bodies[64];
     StaticBody* statics[64];
 
     int rigidBodyCount;
