@@ -20,8 +20,9 @@ private:
 
 public:
     Simulation();
-
     ~Simulation();
+
+    bool CheckBoundaryCollision(RigidBody* body, struct CollisionInfo& result);
 
     void InitialStep(float DeltaTime);
 

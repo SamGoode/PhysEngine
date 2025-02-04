@@ -9,8 +9,11 @@ class RigidBody {
 public:
     Vector2 pos;
     Vector2 vel;
-
     float mass;
+
+    float rotation;
+    float angularVel;
+    float rotationalInertia;
 
 public:
     RigidBody() {}
@@ -41,7 +44,6 @@ class RigidRect : public RigidBody {
 public:
     float width;
     float height;
-    float rotation;
 
 public:
     RigidRect() {}
