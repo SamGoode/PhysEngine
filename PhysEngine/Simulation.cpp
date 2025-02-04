@@ -169,7 +169,7 @@ void Simulation::Step(float DeltaTime) {
 
             
 
-            Vector2 relativeVel = velHalfStep + Vector2{ radial.y, -radial.x } * angularVelHalfStep;
+            Vector2 relativeVel = velHalfStep + Vector2{ -radial.y, radial.x } * angularVelHalfStep;
 
             //angularVelHalfStep * (body->)
 
@@ -177,7 +177,7 @@ void Simulation::Step(float DeltaTime) {
 
             //Vector2 velocityNormal = boundaryCollision.normal * Vector2DotProduct(velHalfStep, boundaryCollision.normal);
             Vector2 velocityNormal = boundaryCollision.normal * Vector2DotProduct(relativeVel, boundaryCollision.normal);
-
+            
             //acceleration += (velocityNormal * -2) * (2 / DeltaTime);
 
             //Vector2 force = (velocityNormal * -2) * (2 / DeltaTime) * body->mass;
