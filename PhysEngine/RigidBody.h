@@ -9,11 +9,13 @@ class RigidBody {
 public:
     Vector2 pos;
     Vector2 vel;
-    float mass;
+    Vector2 acc;
+    float invMass;
 
-    float rotation;
-    float angularVel;
-    float rotationalInertia;
+    float rot;
+    float angVel;
+    float angAcc;
+    float invMOI;
 
 public:
     RigidBody() {}
@@ -21,7 +23,7 @@ public:
     const Vector2& GetPos() const { return pos; }
     void SetPos(Vector2 newPos) { pos = newPos; }
 
-    float GetMass() { return mass; }
+    float GetMass() { return 1 / invMass; }
 
     virtual void Draw() = 0;
 };

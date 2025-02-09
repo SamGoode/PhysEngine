@@ -33,7 +33,7 @@ bool StaticCircle::CheckCollision(RigidBody* body, CollisionInfo& result) {
     RigidRect* rect = dynamic_cast<RigidRect*>(body);
     if (rect) {
         Vector2 toCircle = pos - rect->pos;
-        toCircle = Vector2Rotate(toCircle, -rect->rotation * PI / 180);
+        toCircle = Vector2Rotate(toCircle, -rect->rot);
 
         if (abs(toCircle.x) > rect->width / 2 + radius || abs(toCircle.y) > rect->height / 2 + radius) {
             return false;
@@ -49,10 +49,9 @@ bool StaticCircle::CheckCollision(RigidBody* body, CollisionInfo& result) {
                 return false;
             }
 
-            result.normal = Vector2Normalize((rect->pos + Vector2Rotate(corner, rect->rotation * PI / 180) - pos));
-            Vector2 toImpact = (result.normal * radius) - Vector2Rotate(corner, rect->rotation * PI / 180);
-            //toImpact = Vector2Rotate(toImpact, rect->rotation * PI / 180);
-            result.impact = pos + toImpact;
+            result.normal = Vector2Normalize((rect->pos + Vector2Rotate(corner, rect->rot) - pos));
+            result.impact = pos + result.normal * radius;
+            result.depth = Vector2Distance(result.impact, rect->pos + Vector2Rotate(corner, rect->rot));
 
             return true;
         }
@@ -85,18 +84,19 @@ bool StaticCircle::CheckCollision(RigidBody* body, CollisionInfo& result) {
         Vector2 toImpact = toCircle;
 
         if (result.normal.x == 0) {
-            toImpact.y = (radius + rect->height / 2) * result.normal.y;
+            toImpact.y = (rect->height / 2) * result.normal.y;
+            result.depth = (toImpact.y - toCircle.y);
         }
         else if (result.normal.y == 0) {
-            toImpact.x = (radius + rect->width / 2) * result.normal.x;
+            toImpact.x = (rect->width / 2) * result.normal.x;
+            result.depth = (toImpact.x - toCircle.x);
         }
 
-        toImpact = Vector2Rotate(toImpact, rect->rotation * PI / 180);
-        toImpact = toImpact * -1;
-        result.impact = pos + toImpact;
+        toImpact = Vector2Rotate(toImpact, rect->rot);
+        result.impact = rect->pos + toImpact;
 
-        Vector2 worldNormal = Vector2Rotate(result.normal, rect->rotation * PI / 180);
-        result.normal = worldNormal * -1;
+        Vector2 worldNormal = Vector2Rotate(result.normal, rect->rot) * -1;
+        result.normal = worldNormal;
 
         return true;
     }
@@ -114,10 +114,10 @@ void StaticCircle::Draw(Color color) {
 
 StaticRect::StaticRect(Vector2 _pos, float _width, float _height, float _rotation) {
     pos = _pos;
+    rotation = _rotation;
+
     width = _width;
     height = _height;
-
-    rotation = _rotation;
 }
 
 std::pair<float, float> MinMaxProjection(Vector2 corners[4], Vector2 axis) {
@@ -145,7 +145,7 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
         Vector2 toCircle = circle->GetPos() - pos;
         float radius = circle->radius;
 
-        toCircle = Vector2Rotate(toCircle, -rotation * PI / 180);
+        toCircle = Vector2Rotate(toCircle, -rotation);
 
         if (abs(toCircle.x) > width / 2 + radius || abs(toCircle.y) > height / 2 + radius) {
             return false;
@@ -163,7 +163,7 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
 
             result.normal = Vector2Normalize(toCircle - corner);
             Vector2 toImpact = corner + (result.normal * circle->radius);
-            toImpact = Vector2Rotate(toImpact, rotation * PI / 180);
+            toImpact = Vector2Rotate(toImpact, rotation);
             result.impact = pos + toImpact;
 
             return true;
@@ -203,7 +203,7 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
             toImpact.x = (circle->radius + width / 2) * result.normal.x;
         }
 
-        toImpact = Vector2Rotate(toImpact, rotation * PI / 180);
+        toImpact = Vector2Rotate(toImpact, rotation);
         result.impact = pos + toImpact;
     
         return true;
@@ -227,16 +227,15 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
 
         Vector2 normals[8];
         for (int i = 0; i < 4; i++) {
-            corners[i] = rect->pos + Vector2Rotate(corners[i], rect->rotation * PI / 180);
-            normals[i] = Vector2Rotate({ 0.f, -1.f }, (rect->rotation + (90 * i)) * PI / 180);
+            corners[i] = rect->pos + Vector2Rotate(corners[i], rect->rot);
+            normals[i] = Vector2Rotate({ 0.f, -1.f }, rect->rot + (PI * 0.5 * i));
 
-            m_corners[i] = pos + Vector2Rotate(m_corners[i], rotation * PI / 180);
-            normals[i + 4] = Vector2Rotate({ 0.f, -1.f }, (rotation + (90 * i)) * PI / 180);
+            m_corners[i] = pos + Vector2Rotate(m_corners[i], rotation);
+            normals[i + 4] = Vector2Rotate({ 0.f, -1.f }, rotation + (PI * 0.5 * i));
         }
 
         int minOverlapIndex = -1;
         float minOverlap = FLT_MAX;
-        bool isInverse = false;
 
         for (int i = 0; i < 8; i++) {
             Vector2 normal = normals[i];
@@ -249,36 +248,40 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
             }
 
             float overlap = std::min(abs(r1.second - r2.first), abs(r1.first - r2.second));
-            //float overlap;
-            //bool shouldInvert = false;
-            //if (abs(r1.second - r2.first) < abs(r1.first - r2.second)) {
-            //    overlap = abs(r1.second - r2.first);
-            //}
-            //else {
-            //    overlap = abs(r1.first - r2.second);
-            //    shouldInvert = true;
-            //}
-
             if (overlap < minOverlap) {
                 minOverlapIndex = i;
                 minOverlap = overlap;
-
-                //isInverse = shouldInvert;
             }
         }
 
         result.worldNormal = normals[minOverlapIndex];
-        if (isInverse) {
-            //result.worldNormal = result.worldNormal * -1;
-        }
+        result.depth = minOverlap;
 
-        if (minOverlapIndex < 4) {
+        if (minOverlapIndex < 4) {            
+            Vector2 corner = corners[minOverlapIndex];
+
+            for (int i = 0; i < 4; i++) {
+                if (Vector2DotProduct(m_corners[i] - corner, result.worldNormal) < 0.f) {
+                    result.impact = m_corners[i];
+                    break;
+                }
+            }
+
+            result.depth *= -1;
             result.worldNormal = result.worldNormal * -1;
-            result.normal = Vector2Rotate(result.worldNormal, -rotation * PI / 180);
-            
+            result.normal = Vector2Rotate(result.worldNormal, -rotation);
         }
         else {
-            result.normal = Vector2Rotate(result.worldNormal, -rotation * PI / 180);
+            Vector2 corner = m_corners[minOverlapIndex - 4];
+
+            for (int i = 0; i < 4; i++) {
+                if (Vector2DotProduct(corners[i] - corner, result.worldNormal) < 0.f) {
+                    result.impact = corners[i]; //+ result.worldNormal * minOverlap;
+                    break;
+                }
+            }
+
+            result.normal = Vector2Rotate(result.worldNormal, -rotation);
         }
 
         return true;
@@ -288,11 +291,11 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
 }
 
 void StaticRect::Draw() {
-    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rotation, GREEN);
+    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rotation * 180/PI, GREEN);
 }
 
 void StaticRect::Draw(Color color) {
-    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rotation, color);
+    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rotation * 180/PI, color);
 }
 
 
