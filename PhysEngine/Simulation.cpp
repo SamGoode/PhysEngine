@@ -18,7 +18,7 @@ Simulation::Simulation() {
     //bodies[0] = new RigidCircle({ 900.f, 100.f }, 10.f, 25.f);
     //rigidBodyCount++;
 
-    bodies[0] = new RigidRect({ 1100.f, 200.f }, 50.f, 200.f, 50.f, PI/6);
+    bodies[0] = new RigidRect({ 1200.f, 200.f }, 50.f, 200.f, 50.f, -PI/8 + PI);
     rigidBodyCount++;
 
     statics[0] = new StaticRect({ 700.f, 400.f }, 300.f, 50.f, PI/4);
@@ -27,8 +27,8 @@ Simulation::Simulation() {
     statics[1] = new StaticRect({ 1100.f, 600.f }, 300.f, 50.f, -PI/4);
     staticBodyCount++;
 
-    //statics[2] = new StaticCircle({ 950.f, 400.f }, 50.f);
-    //staticBodyCount++;
+    statics[2] = new StaticCircle({ 950.f, 400.f }, 50.f);
+    staticBodyCount++;
 }
 
 Simulation::~Simulation() {
@@ -175,7 +175,7 @@ void Simulation::Step(float DeltaTime) {
             Vector2 impactVel = body->vel + radialPerp * body->angVel;
 
             float relNormVel = Vector2DotProduct(impactVel, boundaryCollision.normal);
-            float biasVel = boundaryCollision.depth * (0.1f / DeltaTime) * (relNormVel / abs(relNormVel));
+            float biasVel = boundaryCollision.depth * (0.5f / DeltaTime) * (relNormVel / abs(relNormVel));
             float radialPerpNorm = Vector2DotProduct(radialPerp, boundaryCollision.normal);
 
             float impulseMag = (-1.f * (relNormVel + biasVel)) / (body->invMass + (radialPerpNorm * radialPerpNorm * body->invMOI));
@@ -202,7 +202,7 @@ void Simulation::Step(float DeltaTime) {
             Vector2 impactVel = body->vel + radialPerp * body->angVel;
 
             float relNormVel = Vector2DotProduct(impactVel, worldNormal);
-            float biasVel = collision.depth * (0.4f / DeltaTime) * (relNormVel/abs(relNormVel));
+            float biasVel = collision.depth * (0.6f / DeltaTime) * (relNormVel/abs(relNormVel));
             float radialPerpNorm = Vector2DotProduct(radialPerp, worldNormal);
 
             float impulseMag = (-1.f * (relNormVel + biasVel)) / (body->invMass + (radialPerpNorm * radialPerpNorm * body->invMOI));
@@ -215,8 +215,8 @@ void Simulation::Step(float DeltaTime) {
             std::cout << "collision happened" << std::endl;
         }
 
-        body->vel = body->vel + (body->acc * 0.5 * DeltaTime);
-        body->angVel = body->angVel + (body->angAcc * 0.5 * DeltaTime);
+        body->vel += (body->acc * 0.5 * DeltaTime);
+        body->angVel += (body->angAcc * 0.5 * DeltaTime);
     }
 }
 

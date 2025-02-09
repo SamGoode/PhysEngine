@@ -85,11 +85,11 @@ bool StaticCircle::CheckCollision(RigidBody* body, CollisionInfo& result) {
 
         if (result.normal.x == 0) {
             toImpact.y = (rect->height / 2) * result.normal.y;
-            result.depth = (toImpact.y - toCircle.y);
+            result.depth = std::max(abs(toCircle.y) - (abs(toImpact.y) + radius), 0.f);
         }
         else if (result.normal.y == 0) {
             toImpact.x = (rect->width / 2) * result.normal.x;
-            result.depth = (toImpact.x - toCircle.x);
+            result.depth = std::max(abs(toCircle.x) - (abs(toImpact.x) + radius), 0.f);
         }
 
         toImpact = Vector2Rotate(toImpact, rect->rot);
@@ -247,7 +247,15 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
                 return false;
             }
 
-            float overlap = std::min(abs(r1.second - r2.first), abs(r1.first - r2.second));
+            float overlap;// = std::min(abs(r1.second - r2.first), abs(r1.first - r2.second));
+
+            if (i < 4) {
+                overlap = abs(r1.second - r2.first);
+            }
+            else {
+                overlap = abs(r1.first - r2.second);
+            }
+
             if (overlap < minOverlap) {
                 minOverlapIndex = i;
                 minOverlap = overlap;
@@ -267,7 +275,7 @@ bool StaticRect::CheckCollision(RigidBody* body, CollisionInfo& result) {
                 }
             }
 
-            result.depth *= -1;
+            //result.depth *= -1;
             result.worldNormal = result.worldNormal * -1;
             result.normal = Vector2Rotate(result.worldNormal, -rotation);
         }
