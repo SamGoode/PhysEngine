@@ -6,6 +6,10 @@
 
 #include "RigidBody.h"
 #include "StaticBody.h"
+#include "Collision.h"
+
+
+#define MAX_COLLISIONS 64
 
 class Simulation {
 private:
@@ -18,11 +22,21 @@ private:
     int rigidBodyCount;
     int staticBodyCount;
 
+    const int maxCollisions = MAX_COLLISIONS;
+    Collision collisions[MAX_COLLISIONS];
+    int collisionCount = 0;
+
 public:
     Simulation();
     ~Simulation();
 
-    bool CheckBoundaryCollision(RigidBody* body, struct CollisionInfo& result);
+    void AddCollision(Collision collision) { collisions[collisionCount] = collision; collisionCount++; }
+    void ClearCollisions() { collisionCount = 0; }
+
+    void CheckBoundaryCollision(RigidBody* body);
+    void CheckCollision(RigidBody* A, RigidBody* B);
+
+    void ResolveCollision(Collision& collision, float DeltaTime);
 
     void InitialStep(float DeltaTime);
 

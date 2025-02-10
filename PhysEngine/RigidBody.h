@@ -4,7 +4,6 @@
 #include "rlgl.h"
 #include "raymath.h"
 
-
 class RigidBody {
 public:
     Vector2 pos;
@@ -17,13 +16,25 @@ public:
     float angAcc;
     float invMOI;
 
+    bool isStatic;
+
 public:
     RigidBody() {}
 
     const Vector2& GetPos() const { return pos; }
     void SetPos(Vector2 newPos) { pos = newPos; }
 
-    float GetMass() { return 1 / invMass; }
+    void SetStatic() {
+        vel = { 0.f, 0.f };
+        acc = { 0.f, 0.f };
+        invMass = 0.f;
+
+        angVel = 0.f;
+        angAcc = 0.f;
+        invMOI = 0.f;
+
+        isStatic = true;
+    }
 
     virtual void Draw() = 0;
 };

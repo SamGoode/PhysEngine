@@ -4,6 +4,10 @@
 #include "rlgl.h"
 #include "raymath.h"
 
+#include <cmath>
+
+std::pair<float, float> MinMaxProjection(Vector2 corners[4], Vector2 axis);
+
 
 class StaticBody {
 public:
@@ -33,7 +37,7 @@ public:
 
     float GetRadius() { return radius; }
 
-    virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
+    //virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
 
     virtual void Draw() override;
     virtual void Draw(class Color color) override;
@@ -52,7 +56,7 @@ public:
     float GetWidth() { return width; }
     float GetHeight() { return height; }
 
-    virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
+    //virtual bool CheckCollision(class RigidBody* body, CollisionInfo& result) override;
 
     virtual void Draw() override;
     virtual void Draw(class Color color) override;

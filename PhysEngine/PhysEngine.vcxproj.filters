@@ -44,7 +44,7 @@
     <ClInclude Include="rlshort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionInfo.h">
+    <ClInclude Include="Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

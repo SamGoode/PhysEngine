@@ -14,12 +14,17 @@ RigidCircle::RigidCircle(Vector2 _pos, float _mass, float _radius) {
     angAcc = 0.f;
     invMOI = 1 / (_mass * _radius * _radius * _radius * _radius * 0.25f);
 
+    isStatic = false;
+
     radius = _radius;
 }
 
 void RigidCircle::Draw() {
-    DrawCircle(pos.x, pos.y, radius, BLUE);
+    Color color = BLUE;
+    if (isStatic) { color = GREEN; }
+    DrawCircle(pos.x, pos.y, radius, color);
 }
+
 
 RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation) {
     pos = _pos;
@@ -32,10 +37,14 @@ RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, flo
     angAcc = 0.f;
     invMOI = 1 / (_mass * _width * _width + _height * _height * (1.f / 12.f));
 
+    isStatic = false;
+
     width = _width;
     height = _height;
 }
 
 void RigidRect::Draw() {
-    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rot * 180/PI, BLUE);
+    Color color = BLUE;
+    if (isStatic) { color = GREEN; }
+    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rot * 180/PI, color);
 }
