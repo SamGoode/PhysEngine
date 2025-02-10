@@ -20,7 +20,7 @@ Simulation::Simulation() {
     //bodies[0] = new RigidCircle({ 900.f, 100.f }, 10.f, 25.f);
     //rigidBodyCount++;
 
-    bodies[0] = new RigidRect({ 1000.f, 200.f }, 50.f, 200.f, 50.f, -PI/8);
+    bodies[0] = new RigidRect({ 1000.f, 200.f }, 100.f, 200.f, 50.f, -PI/8);
     rigidBodyCount++;
 
     bodies[1] = new RigidRect({ 700.f, 400.f }, 1.f, 300.f, 50.f, PI / 4);
@@ -29,6 +29,9 @@ Simulation::Simulation() {
 
     bodies[2] = new RigidRect({ 1100.f, 600.f }, 1.f, 300.f, 50.f, -PI / 4);
     bodies[2]->SetStatic();
+    rigidBodyCount++;
+
+    bodies[3] = new RigidRect({ 800.f, 200.f }, 200.f, 100.f, 100.f, PI/3);
     rigidBodyCount++;
 }
 
@@ -146,34 +149,6 @@ void Simulation::CheckBoundaryCollision(RigidBody* body) {
     }
 }
 
-//void resolveBoundaryCollision(RigidBody* A, const Collision& result, float& lambdaSum, float DeltaTime) {
-//    Vector2 velA = A->vel;
-//    float angVelA = A->angVel;
-//
-//    float invMassA = A->invMass;
-//    float invMOIA = A->invMOI;
-//
-//    Vector2 norm = result.worldNormal;
-//
-//    Vector2 radA = result.pointA - A->pos;
-//    Vector2 radPerpA = { -radA.y, radA.x };
-//
-//    float bias = -result.depth * (0.1f / DeltaTime);
-//
-//    float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm, radPerpA) * -angVelA);
-//    float effMass = invMassA + (Vector2DotProduct(norm, radPerpA) * Vector2DotProduct(norm, radPerpA) * invMOIA);
-//
-//    float lambda = -(JV + bias) / effMass;
-//
-//    float oldSum = lambdaSum;
-//    lambdaSum = std::max(lambdaSum + lambda, 0.f);
-//
-//    lambda = lambdaSum - oldSum;
-//
-//    A->vel += (norm * -invMassA) * lambda;
-//    A->angVel += Vector2DotProduct(norm, radPerpA) * -invMOIA * lambda;
-//}
-
 void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
     RigidRect* rectA = dynamic_cast<RigidRect*>(A);
     RigidRect* rectB = dynamic_cast<RigidRect*>(B);
@@ -233,27 +208,29 @@ void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
         Collision collision;
         collision.bodyA = rectA;
         collision.bodyB = rectB;
-        collision.worldNormal = normals[minOverlapIndex];
         collision.depth = minOverlap;
 
+        Vector2 normal = normals[minOverlapIndex];
         if (minOverlapIndex < 4) {
+            collision.worldNormal = normal;
             Vector2 cornerA = cornersA[minOverlapIndex];
 
             for (int i = 0; i < 4; i++) {
-                if (Vector2DotProduct(cornersB[i] - cornerA, collision.worldNormal) < 0.f) {
-                    collision.pointA = cornersB[i] + collision.worldNormal * collision.depth;
+                if (Vector2DotProduct(cornersB[i] - cornerA, normal) < 0.f) {
+                    collision.pointA = cornersB[i] + normal * collision.depth;
                     collision.pointB = cornersB[i];
                     break; //Maybe remove this later?
                 }
             }
         }
         else {
+            collision.worldNormal = normal * -1;
             Vector2 cornerB = cornersB[minOverlapIndex - 4];
-            
+
             for (int i = 0; i < 4; i++) {
-                if (Vector2DotProduct(cornersA[i] - cornerB, collision.worldNormal) < 0.f) {
+                if (Vector2DotProduct(cornersA[i] - cornerB, normal) < 0.f) {
                     collision.pointA = cornersA[i];
-                    collision.pointB = cornersA[i] - collision.worldNormal * collision.depth;
+                    collision.pointB = cornersA[i] + normal * collision.depth;
                     break; //Maybe remove this later?
                 }
             }
@@ -315,7 +292,7 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
 
     if (B) {
         B->vel += (norm * invMassB) * lambda;
-        B->angVel += Vector2DotProduct(norm, radPerpA) * invMOIB * lambda;
+        B->angVel += Vector2DotProduct(norm, radPerpB) * invMOIB * lambda;
     }
 }
 
@@ -372,7 +349,7 @@ void Simulation::Step(float DeltaTime) {
 
 
     // Sequential Impulse Solver
-    int iterations = 5;
+    int iterations = 3;
     for (int i = 0; i < iterations; i++) {
         for (int n = 0; n < collisionCount; n++) {
             ResolveCollision(collisions[n], DeltaTime);
@@ -390,71 +367,6 @@ void Simulation::Step(float DeltaTime) {
         body->vel += body->acc * DeltaTime * 0.5;
         body->angVel += body->angAcc * DeltaTime * 0.5;
     }
-
-    //for (int i = 0; i < rigidBodyCount; i++) {
-    //    RigidBody* body = bodies[i];
-
-    //    body->vel += body->acc * DeltaTime * 0.5;
-    //    body->pos += body->vel * DeltaTime;
-    //    body->acc = { 0.f, 0.f };
-
-    //    body->angVel += body->angAcc * DeltaTime * 0.5;
-    //    body->rot += body->angVel * DeltaTime;
-    //    body->angAcc = 0.f;
-
-    //    body->acc += gravity;
-
-    //    CollisionInfo boundaryCollision;
-    //    if (CheckBoundaryCollision(body, boundaryCollision)) {
-    //        Vector2 radial = boundaryCollision.impact - body->pos;
-    //        Vector2 radialPerp = { -radial.y, radial.x };
-
-    //        Vector2 impactVel = body->vel + radialPerp * body->angVel;
-
-    //        float relNormVel = Vector2DotProduct(impactVel, boundaryCollision.normal);
-    //        float biasVel = boundaryCollision.depth * (0.5f / DeltaTime) * (relNormVel / abs(relNormVel));
-    //        float radialPerpNorm = Vector2DotProduct(radialPerp, boundaryCollision.normal);
-
-    //        float impulseMag = (-1.f * (relNormVel + biasVel)) / (body->invMass + (radialPerpNorm * radialPerpNorm * body->invMOI));
-    //        Vector2 impulse = boundaryCollision.normal * impulseMag;
-    //        float angularImpulse = Vector2DotProduct(radialPerp, impulse);
-
-    //        body->acc += impulse * body->invMass * (1 / DeltaTime);
-    //        body->angAcc += angularImpulse * body->invMOI * (1 / DeltaTime);
-    //        
-    //        std::cout << "collision happened" << std::endl;
-    //    }
-
-    //    for (int n = 0; n < staticBodyCount; n++) {
-    //        StaticBody* staticBody = statics[n];
-
-    //        CollisionInfo collision;
-    //        if (!staticBody->CheckCollision(body, collision)) { continue; }
-
-    //        Vector2 worldNormal = Vector2Rotate(collision.normal, staticBody->GetRotation());
-    //        
-    //        Vector2 radial = collision.impact - body->pos;
-    //        Vector2 radialPerp = { -radial.y, radial.x };
-
-    //        Vector2 impactVel = body->vel + radialPerp * body->angVel;
-
-    //        float relNormVel = Vector2DotProduct(impactVel, worldNormal);
-    //        float biasVel = collision.depth * (0.6f / DeltaTime) * (relNormVel/abs(relNormVel));
-    //        float radialPerpNorm = Vector2DotProduct(radialPerp, worldNormal);
-
-    //        float impulseMag = (-1.f * (relNormVel + biasVel)) / (body->invMass + (radialPerpNorm * radialPerpNorm * body->invMOI));
-    //        Vector2 impulse = worldNormal * impulseMag;
-    //        float angularImpulse = Vector2DotProduct(radialPerp, impulse);
-
-    //        body->acc += impulse * body->invMass * (1 / DeltaTime);
-    //        body->angAcc += angularImpulse * body->invMOI * (1 / DeltaTime);
-
-    //        std::cout << "collision happened" << std::endl;
-    //    }
-
-    //    body->vel += (body->acc * 0.5 * DeltaTime);
-    //    body->angVel += (body->angAcc * 0.5 * DeltaTime);
-    //}
 }
 
 void Simulation::Draw() {
