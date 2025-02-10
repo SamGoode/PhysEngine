@@ -21,9 +21,6 @@ public:
 public:
     RigidBody() {}
 
-    const Vector2& GetPos() const { return pos; }
-    void SetPos(Vector2 newPos) { pos = newPos; }
-
     void SetStatic() {
         vel = { 0.f, 0.f };
         acc = { 0.f, 0.f };
@@ -36,7 +33,22 @@ public:
         isStatic = true;
     }
 
+    virtual int GetID() = 0;
     virtual void Draw() = 0;
+};
+
+
+class RigidRect : public RigidBody {
+public:
+    float width;
+    float height;
+
+public:
+    RigidRect() {}
+    RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation);
+
+    virtual int GetID() override { return 0; };
+    virtual void Draw() override;
 };
 
 
@@ -48,19 +60,7 @@ public:
     RigidCircle() {}
     RigidCircle(Vector2 _pos, float _mass, float _radius);
 
-    float GetRadius() const { return radius; }
-
+    virtual int GetID() override { return 1; };
     virtual void Draw() override;
 };
 
-class RigidRect : public RigidBody {
-public:
-    float width;
-    float height;
-
-public:
-    RigidRect() {}
-    RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation);
-
-    virtual void Draw() override;
-};

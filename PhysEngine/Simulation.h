@@ -35,6 +35,8 @@ public:
 
     void CheckBoundaryCollision(RigidBody* body);
     void CheckCollision(RigidBody* A, RigidBody* B);
+    void CheckCollisionRC(RigidBody* A, RigidBody* B);
+    void CheckCollisionRR(RigidBody* A, RigidBody* B);
 
     void ResolveCollision(Collision& collision, float DeltaTime);
 
