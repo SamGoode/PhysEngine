@@ -149,6 +149,113 @@ void Simulation::CheckBoundaryCollision(RigidBody* body) {
     }
 }
 
+//void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
+//    RigidRect* rect = dynamic_cast<RigidRect*>(A);
+//    RigidCircle* circle = dynamic_cast<RigidCircle*>(B);
+//
+//    if (rect && circle) {
+//        Collision collision;
+//        collision.bodyA = rect;
+//        collision.bodyB = circle;
+//        
+//        Vector2 toCircle = Vector2Rotate(circle->pos - rect->pos, -rect->rot);
+//        Vector2 absToCircle = { abs(toCircle.x), abs(toCircle.y) };
+//
+//        if (abs(toCircle.x) > circle->radius + rect->width / 2 || abs(toCircle.y) > circle->radius + rect->height / 2) {
+//            return;
+//        }
+//
+//        if (abs(toCircle.x) > rect->width / 2 && abs(toCircle.y) > rect->height / 2) {
+//            Vector2 absCorner = { rect->width / 2, rect->height / 2 };
+//
+//            if (Vector2DistanceSqr(absCorner, absToCircle) > circle->radius * circle->radius) {
+//                return;
+//            }
+//
+//            Vector2{ (toCircle.x > 0) * 2.f - 1.f, (toCircle.y > 0) * 2.f - 1.f };
+//
+//            collision.pointA = { absCorner.x * ((toCircle.x > 0) * 2.f - 1.f), absCorner.y * ((toCircle.y > 0) * 2.f - 1.f) };
+//            collision.pointB = 
+//
+//            result.normal = Vector2Normalize((rect->pos + Vector2Rotate(corner, rect->rot) - pos));
+//            result.impact = pos + result.normal * radius;
+//            result.depth = Vector2Distance(result.impact, rect->pos + Vector2Rotate(corner, rect->rot));
+//
+//            return true;
+//        }
+//
+//        Vector2 normals[8];
+//        for (int i = 0; i < 4; i++) {
+//            cornersA[i] = rectA->pos + Vector2Rotate(cornersA[i], rectA->rot);
+//            normals[i] = Vector2Rotate({ 0.f, -1.f }, rectA->rot + (PI * 0.5 * i));
+//
+//            cornersB[i] = rectB->pos + Vector2Rotate(cornersB[i], rectB->rot);
+//            normals[i + 4] = Vector2Rotate({ 0.f, -1.f }, rectB->rot + (PI * 0.5 * i));
+//        }
+//
+//        int minOverlapIndex = -1;
+//        float minOverlap = FLT_MAX;
+//
+//        for (int i = 0; i < 8; i++) {
+//            Vector2 normal = normals[i];
+//
+//            std::pair r1 = MinMaxProjection(cornersA, normal);
+//            std::pair r2 = MinMaxProjection(cornersB, normal);
+//
+//            if (r1.second < r2.first || r2.second < r1.first) {
+//                return;
+//            }
+//
+//            float overlap;
+//
+//            if (i < 4) {
+//                overlap = abs(r1.second - r2.first);
+//            }
+//            else {
+//                overlap = abs(r1.first - r2.second);
+//            }
+//
+//            if (overlap < minOverlap) {
+//                minOverlapIndex = i;
+//                minOverlap = overlap;
+//            }
+//        }
+//
+//        Collision collision;
+//        collision.bodyA = rectA;
+//        collision.bodyB = rectB;
+//        collision.depth = minOverlap;
+//
+//        Vector2 normal = normals[minOverlapIndex];
+//        if (minOverlapIndex < 4) {
+//            collision.worldNormal = normal;
+//            Vector2 cornerA = cornersA[minOverlapIndex];
+//
+//            for (int i = 0; i < 4; i++) {
+//                if (Vector2DotProduct(cornersB[i] - cornerA, normal) < 0.f) {
+//                    collision.pointA = cornersB[i] + normal * collision.depth;
+//                    collision.pointB = cornersB[i];
+//                    break; //Maybe remove this later?
+//                }
+//            }
+//        }
+//        else {
+//            collision.worldNormal = normal * -1;
+//            Vector2 cornerB = cornersB[minOverlapIndex - 4];
+//
+//            for (int i = 0; i < 4; i++) {
+//                if (Vector2DotProduct(cornersA[i] - cornerB, normal) < 0.f) {
+//                    collision.pointA = cornersA[i];
+//                    collision.pointB = cornersA[i] + normal * collision.depth;
+//                    break; //Maybe remove this later?
+//                }
+//            }
+//        }
+//
+//        AddCollision(collision);
+//    }
+//}
+
 void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
     RigidRect* rectA = dynamic_cast<RigidRect*>(A);
     RigidRect* rectB = dynamic_cast<RigidRect*>(B);
