@@ -17,11 +17,11 @@ Simulation::Simulation() {
     rigidBodyCount = 0;
     staticBodyCount = 0;
 
-    //bodies[0] = new RigidRect({ 1000.f, 200.f }, 100.f, 200.f, 50.f, -PI/8);
-    //rigidBodyCount++;
-
-    bodies[0] = new RigidCircle({ 700.f, 100.f }, 10.f, 50.f);
+    bodies[0] = new RigidRect({ 1000.f, 200.f }, 10.f, 400.f, 100.f, -PI/8);
     rigidBodyCount++;
+
+    //bodies[1] = new RigidCircle({ 700.f, 100.f }, 1000.f, 50.f);
+    //rigidBodyCount++;
 
     bodies[1] = new RigidRect({ 700.f, 400.f }, 1.f, 300.f, 50.f, PI / 4);
     bodies[1]->SetStatic();
@@ -31,8 +31,12 @@ Simulation::Simulation() {
     bodies[2]->SetStatic();
     rigidBodyCount++;
 
-    //bodies[3] = new RigidRect({ 800.f, 200.f }, 200.f, 100.f, 100.f, PI/3);
+    //bodies[4] = new RigidRect({ 800.f, 200.f }, 200.f, 100.f, 100.f, PI/3);
     //rigidBodyCount++;
+
+    bodies[3] = new RigidCircle({ 900.f, 400.f }, 1.f, 50.f);
+    bodies[3]->SetStatic();
+    rigidBodyCount++;
 }
 
 Simulation::~Simulation() {
@@ -149,62 +153,6 @@ void Simulation::CheckBoundaryCollision(RigidBody* body) {
     }
 }
 
-void Simulation::CheckCollisionRC(RigidBody* A, RigidBody* B) {
-    RigidRect* rect = dynamic_cast<RigidRect*>(A);
-    RigidCircle* circle = dynamic_cast<RigidCircle*>(B);
-
-    if (rect && circle) {
-        Collision collision;
-        collision.bodyA = rect;
-        collision.bodyB = circle;
-        
-        Vector2 toCircle = Vector2Rotate(circle->pos - rect->pos, -rect->rot);
-        Vector2 absToCircle = { abs(toCircle.x), abs(toCircle.y) };
-
-        if (abs(toCircle.x) > circle->radius + rect->width / 2 || abs(toCircle.y) > circle->radius + rect->height / 2) {
-            return;
-        }
-
-        if (abs(toCircle.x) > rect->width / 2 && abs(toCircle.y) > rect->height / 2) {
-            Vector2 absCorner = { rect->width / 2, rect->height / 2 };
-
-            if (Vector2DistanceSqr(absCorner, absToCircle) > circle->radius * circle->radius) {
-                return;
-            }
-
-            Vector2 toCorner = { absCorner.x * ((toCircle.x > 0) * 2.f - 1.f), absCorner.y * ((toCircle.y > 0) * 2.f - 1.f) };
-            Vector2 cornerPos = rect->pos + Vector2Rotate(toCorner, rect->rot);
-
-            collision.worldNormal = Vector2Normalize(circle->pos - cornerPos);
-            collision.pointA = cornerPos;
-            collision.pointB = circle->pos + Vector2Normalize(rect->pos - circle->pos) * circle->radius;
-            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
-
-            AddCollision(collision);
-
-            return;
-        }
-
-        if (abs(toCircle.x) > rect->width / 2) {
-            Vector2 normal = { (toCircle.x > 0) * 2.f - 1.f, 0.f };
-            collision.worldNormal = Vector2Rotate(normal, rect->rot);
-            collision.pointA = rect->pos + Vector2Rotate({ normal.x * rect->width / 2, toCircle.y }, rect->rot);
-            collision.pointB = circle->pos - collision.worldNormal * circle->radius;
-            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
-
-            AddCollision(collision);
-        }
-        else {
-            Vector2 normal = { 0.f, (toCircle.y > 0) * 2.f - 1.f };
-            collision.worldNormal = Vector2Rotate(normal, rect->rot);
-            collision.pointA = rect->pos + Vector2Rotate({ toCircle.x, normal.y * rect->height / 2 }, rect->rot);
-            collision.pointB = circle->pos - collision.worldNormal * circle->radius;
-            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
-
-            AddCollision(collision);
-        }
-    }
-}
 
 void Simulation::CheckCollisionRR(RigidBody* A, RigidBody* B) {
     RigidRect* rectA = dynamic_cast<RigidRect*>(A);
@@ -298,6 +246,91 @@ void Simulation::CheckCollisionRR(RigidBody* A, RigidBody* B) {
 }
 
 
+void Simulation::CheckCollisionRC(RigidBody* A, RigidBody* B) {
+    RigidRect* rect = dynamic_cast<RigidRect*>(A);
+    RigidCircle* circle = dynamic_cast<RigidCircle*>(B);
+
+    if (rect && circle) {
+        Collision collision;
+        collision.bodyA = rect;
+        collision.bodyB = circle;
+        
+        Vector2 toCircle = Vector2Rotate(circle->pos - rect->pos, -rect->rot);
+        Vector2 absToCircle = { abs(toCircle.x), abs(toCircle.y) };
+
+        if (abs(toCircle.x) > circle->radius + rect->width / 2 || abs(toCircle.y) > circle->radius + rect->height / 2) {
+            return;
+        }
+
+        if (abs(toCircle.x) > rect->width / 2 && abs(toCircle.y) > rect->height / 2) {
+            Vector2 absCorner = { rect->width / 2, rect->height / 2 };
+
+            if (Vector2DistanceSqr(absCorner, absToCircle) > circle->radius * circle->radius) {
+                return;
+            }
+
+            Vector2 toCorner = { absCorner.x * ((toCircle.x > 0) * 2.f - 1.f), absCorner.y * ((toCircle.y > 0) * 2.f - 1.f) };
+            Vector2 cornerPos = rect->pos + Vector2Rotate(toCorner, rect->rot);
+
+            collision.worldNormal = Vector2Normalize(circle->pos - cornerPos);
+            collision.pointA = cornerPos;
+            collision.pointB = circle->pos - collision.worldNormal * circle->radius;
+            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
+
+            AddCollision(collision);
+
+            return;
+        }
+
+        if (abs(toCircle.x) > rect->width / 2) {
+            Vector2 normal = { (toCircle.x > 0) * 2.f - 1.f, 0.f };
+            collision.worldNormal = Vector2Rotate(normal, rect->rot);
+            collision.pointA = rect->pos + Vector2Rotate({ normal.x * rect->width / 2, toCircle.y }, rect->rot);
+            collision.pointB = circle->pos - collision.worldNormal * circle->radius;
+            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
+
+            AddCollision(collision);
+        }
+        else {
+            Vector2 normal = { 0.f, (toCircle.y > 0) * 2.f - 1.f };
+            collision.worldNormal = Vector2Rotate(normal, rect->rot);
+            collision.pointA = rect->pos + Vector2Rotate({ toCircle.x, normal.y * rect->height / 2 }, rect->rot);
+            collision.pointB = circle->pos - collision.worldNormal * circle->radius;
+            collision.depth = Vector2DotProduct(collision.pointB - collision.pointA, collision.worldNormal * -1);
+
+            AddCollision(collision);
+        }
+    }
+}
+
+void Simulation::CheckCollisionCC(RigidBody* A, RigidBody* B) {
+    RigidCircle* circleA = dynamic_cast<RigidCircle*>(A);
+    RigidCircle* circleB = dynamic_cast<RigidCircle*>(B);
+
+    if (circleA && circleB) {
+        float radii = (circleA->radius + circleB->radius);
+        Vector2 AtoB = circleB->pos - circleA->pos;
+
+        if (Vector2LengthSqr(AtoB) > radii * radii) {
+            return;
+        }
+
+        Vector2 normal = Vector2Normalize(AtoB);
+
+        Collision collision = {
+            .bodyA = circleA,
+            .bodyB = circleB,
+            .worldNormal = normal,
+            .pointA = circleA->pos + normal * circleA->radius,
+            .pointB = circleB->pos - normal * circleB->radius,
+            .depth = radii - Vector2Length(AtoB)
+        };
+
+        AddCollision(collision);
+    }
+}
+
+
 void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
     if (A->GetID() > B->GetID()) {
         RigidBody* temp = A;
@@ -312,6 +345,9 @@ void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
         break;
     case 1:    
         CheckCollisionRC(A, B);
+        break;
+    case 2:
+        CheckCollisionCC(A, B);
         break;
     }
 }
@@ -354,7 +390,7 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
 
     float bias = -collision.depth * (0.1f/DeltaTime);
 
-    float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm, radPerpA) * -angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
+    float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpA) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
     float effMass = invMassA + (Vector2DotProduct(norm, radPerpA) * Vector2DotProduct(norm, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
 
     float lambda = -(JV + bias) / effMass;
@@ -426,7 +462,7 @@ void Simulation::Step(float DeltaTime) {
 
 
     // Sequential Impulse Solver
-    int iterations = 3;
+    int iterations = 5;
     for (int i = 0; i < iterations; i++) {
         for (int n = 0; n < collisionCount; n++) {
             ResolveCollision(collisions[n], DeltaTime);
