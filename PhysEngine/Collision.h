@@ -5,8 +5,8 @@
 #include "RigidBody.h"
 
 struct Collision {
-    RigidBody* bodyA;
-    RigidBody* bodyB;
+    RigidBody* bodyA = nullptr;
+    RigidBody* bodyB = nullptr;
 
     Vector2 worldNormal;
     Vector2 pointA;

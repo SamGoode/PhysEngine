@@ -37,6 +37,7 @@ public:
     void CheckCollisionCC(RigidBody* A, RigidBody* B);
 
     void ResolveCollision(Collision& collision, float DeltaTime);
+    void ResolveCollisionPair(Collision& collisionA, Collision& collisionB, float DeltaTime);
 
     void InitialStep(float DeltaTime);
 
