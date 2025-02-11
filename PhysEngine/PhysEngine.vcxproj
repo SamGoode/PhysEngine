@@ -145,14 +145,12 @@
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="rlshort.cpp" />
     <ClCompile Include="Simulation.cpp" />
-    <ClCompile Include="StaticBody.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="rlshort.h" />
     <ClInclude Include="Simulation.h" />
-    <ClInclude Include="StaticBody.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

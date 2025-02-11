@@ -5,7 +5,6 @@
 #include "raymath.h"
 
 #include "RigidBody.h"
-#include "StaticBody.h"
 #include "Collision.h"
 
 
@@ -17,10 +16,8 @@ private:
     Vector2 gravity;
 
     RigidBody* bodies[64];
-    StaticBody* statics[64];
 
     int rigidBodyCount;
-    int staticBodyCount;
 
     const int maxCollisions = MAX_COLLISIONS;
     Collision collisions[MAX_COLLISIONS];

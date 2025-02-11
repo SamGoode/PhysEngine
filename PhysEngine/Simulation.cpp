@@ -8,16 +8,14 @@
 
 #include "Collision.h"
 
-#include "StaticBody.h"
 
 Simulation::Simulation() {
     boundary = { 0.f, 0.f, 1800.f, 900.f };
     gravity = { 0.f, 200.f };
 
     rigidBodyCount = 0;
-    staticBodyCount = 0;
 
-    bodies[0] = new RigidRect({ 1000.f, 200.f }, 10.f, 400.f, 100.f, -PI/8);
+    bodies[0] = new RigidRect({ 1000.f, 200.f }, 10.f, 200.f, 50.f, -PI/8);
     rigidBodyCount++;
 
     //bodies[1] = new RigidCircle({ 700.f, 100.f }, 1000.f, 50.f);
@@ -42,10 +40,6 @@ Simulation::Simulation() {
 Simulation::~Simulation() {
     for (int i = 0; i < rigidBodyCount; i++) {
         delete bodies[i];
-    }
-
-    for (int i = 0; i < staticBodyCount; i++) {
-        delete statics[i];
     }
 }
 
@@ -153,6 +147,25 @@ void Simulation::CheckBoundaryCollision(RigidBody* body) {
     }
 }
 
+
+std::pair<float, float> MinMaxProjection(Vector2 corners[4], Vector2 axis) {
+    float projection = Vector2DotProduct(corners[0], axis);
+    float max = projection;
+    float min = projection;
+
+    for (int i = 1; i < 4; i++) {
+        projection = Vector2DotProduct(corners[i], axis);
+
+        if (projection > max) {
+            max = projection;
+        }
+        if (projection < min) {
+            min = projection;
+        }
+    }
+
+    return std::pair(min, max);
+}
 
 void Simulation::CheckCollisionRR(RigidBody* A, RigidBody* B) {
     RigidRect* rectA = dynamic_cast<RigidRect*>(A);
@@ -391,7 +404,7 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
     float bias = -collision.depth * (0.1f/DeltaTime);
 
     float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpA) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
-    float effMass = invMassA + (Vector2DotProduct(norm, radPerpA) * Vector2DotProduct(norm, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
+    float effMass = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
 
     float lambda = -(JV + bias) / effMass;
 
@@ -401,7 +414,7 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
     lambda = collision.lambdaSum - oldSum;
 
     A->vel += (norm * -invMassA) * lambda;
-    A->angVel += Vector2DotProduct(norm, radPerpA) * -invMOIA * lambda;
+    A->angVel += Vector2DotProduct(norm * -1, radPerpA) * invMOIA * lambda;
 
     if (B) {
         B->vel += (norm * invMassB) * lambda;
@@ -485,10 +498,6 @@ void Simulation::Step(float DeltaTime) {
 void Simulation::Draw() {
     for (int i = 0; i < rigidBodyCount; i++) {
         bodies[i]->Draw();
-    }
-
-    for (int i = 0; i < staticBodyCount; i++) {
-        statics[i]->Draw();
     }
 
     DrawVectorText(bodies[0]->pos, 20, 50, 20, BLUE);
