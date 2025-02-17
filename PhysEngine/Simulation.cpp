@@ -669,6 +669,30 @@ void Simulation::Step(float DeltaTime) {
         }
     }
 
+    for (int i = 0; i < collisionCount; i++) {
+        PrintVectorText(collisions[i].impulseVelA);
+
+        Vector2 normal = collisions[i].worldNormal;
+        float lambda = collisions[i].lambdaSum;
+
+        RigidBody* A = collisions[i].bodyA;
+        RigidBody* B = collisions[i].bodyB;
+
+        Vector2 radA = collisions[i].pointA - A->pos;
+        Vector2 radPerpA = { -radA.y, radA.x };
+
+        A->vel += normal * -1 * lambda * elasticity * A->invMass;
+        //A->angVel += Vector2DotProduct(normal * -1, radPerpA) * lambda * elasticity * A->invMOI;
+
+        if (B) {
+            Vector2 radB = collisions[i].pointB - B->pos;
+            Vector2 radPerpB = { -radB.y, radB.x };
+
+            B->vel += normal * lambda * elasticity * B->invMass;
+            //B->angVel += Vector2DotProduct(normal, radPerpB) * lambda * elasticity * B->invMOI;
+        }
+    }
+
     //for (int i = 0; i < collisionCount; i++) {
     //    PrintVectorText(collisions[i].impulseVelA);
 
