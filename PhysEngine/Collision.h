@@ -14,4 +14,9 @@ struct Collision {
     float depth;
 
     float lambdaSum = 0.f;
+
+    Vector2 impulseVelA = { 0.f, 0.f };
+    float impulseAngVelA = 0.f;
+    Vector2 impulseVelB = { 0.f, 0.f };
+    float impulseAngVelB = 0.f;
 };

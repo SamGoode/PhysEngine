@@ -15,6 +15,11 @@ private:
     Vector4 boundary;
     Vector2 gravity;
 
+    float biasSlop;
+    float biasFactor;
+
+    float elasticity = 0.5f;
+
     RigidBody* bodies[64];
 
     int rigidBodyCount;

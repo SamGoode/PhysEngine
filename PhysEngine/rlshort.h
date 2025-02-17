@@ -10,7 +10,7 @@ Vector2 operator+(const Vector2& a, const Vector2& b);
 Vector2 operator-(const Vector2& a, const Vector2& b);
 Vector2& operator+=(Vector2& a, const Vector2& b);
 
-float Vector2CrossProduct(const Vector2& a, const Vector2& b);
+bool operator==(const Vector2& a, const Vector2& b);
 
 void DrawVectorText(Vector2 a, int posX, int posY, int fontSize, Color color);
 void PrintVectorText(Vector2 a);
