@@ -19,6 +19,7 @@ private:
     float biasFactor;
 
     float elasticity = 0.5f;
+    float friction = 0.5f;
 
     RigidBody* bodies[64];
 

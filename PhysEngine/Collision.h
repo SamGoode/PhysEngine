@@ -8,10 +8,11 @@ struct Collision {
     RigidBody* bodyA = nullptr;
     RigidBody* bodyB = nullptr;
 
-    Vector2 worldNormal;
-    Vector2 pointA;
-    Vector2 pointB;
-    float depth;
+    Vector2 worldNormal = { 0.f, 0.f };
+    Vector2 worldTangent = { 0.f, 0.f };
+    Vector2 pointA = { 0.f, 0.f };
+    Vector2 pointB = { 0.f, 0.f };
+    float depth = 0.f;
 
     float lambdaSum = 0.f;
 
@@ -19,4 +20,9 @@ struct Collision {
     float impulseAngVelA = 0.f;
     Vector2 impulseVelB = { 0.f, 0.f };
     float impulseAngVelB = 0.f;
+
+    float tangentLambdaSum = 0.f;
+
+    Vector2 frictionalImpulseA = { 0.f, 0.f };
+    Vector2 frictionalImpulseB = { 0.f, 0.f };
 };

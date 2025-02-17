@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include "rlshort.h"
 
@@ -18,25 +19,25 @@ Simulation::Simulation() {
 
     rigidBodyCount = 0;
 
-    bodies[0] = new RigidRect({ 1000.f, 200.f }, 500.f, 200.f, 50.f, -PI/8);
+    //bodies[0] = new RigidRect({ 1000.f, 200.f }, 500.f, 200.f, 50.f, -PI / 6);
+    //rigidBodyCount++;
+
+    bodies[0] = new RigidCircle({ 700.f, 100.f }, 500.f, 50.f);
     rigidBodyCount++;
 
-    bodies[1] = new RigidCircle({ 700.f, 100.f }, 500.f, 50.f);
+    bodies[1] = new RigidRect({ 700.f, 400.f }, 1.f, 300.f, 50.f, PI / 4);
+    bodies[1]->SetStatic();
     rigidBodyCount++;
 
-    bodies[2] = new RigidRect({ 700.f, 400.f }, 1.f, 300.f, 50.f, PI / 4);
+    bodies[2] = new RigidRect({ 1100.f, 600.f }, 1.f, 300.f, 50.f, -PI / 4);
     bodies[2]->SetStatic();
     rigidBodyCount++;
 
-    bodies[3] = new RigidRect({ 1100.f, 600.f }, 1.f, 300.f, 50.f, -PI / 4);
+    //bodies[4] = new RigidRect({ 800.f, 200.f }, 300.f, 100.f, 100.f, PI/3);
+    //rigidBodyCount++;
+
+    bodies[3] = new RigidCircle({ 900.f, 400.f }, 1.f, 50.f);
     bodies[3]->SetStatic();
-    rigidBodyCount++;
-
-    bodies[4] = new RigidRect({ 800.f, 200.f }, 300.f, 100.f, 100.f, PI/3);
-    rigidBodyCount++;
-
-    bodies[5] = new RigidCircle({ 900.f, 400.f }, 1.f, 50.f);
-    bodies[5]->SetStatic();
     rigidBodyCount++;
 }
 
@@ -389,6 +390,8 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
     RigidBody* B = collision.bodyB;
     
     Vector2 norm = collision.worldNormal;
+    collision.worldTangent = { -norm.y, norm.x };
+    Vector2 tangent = collision.worldTangent;
 
     Vector2 velA = A->vel + collision.impulseVelA;
     float angVelA = A->angVel + collision.impulseAngVelA;
@@ -430,6 +433,17 @@ void Simulation::ResolveCollision(Collision& collision, float DeltaTime) {
     collision.lambdaSum = std::max(collision.lambdaSum + lambda, 0.f);
     
     lambda = collision.lambdaSum - oldSum;
+
+    float tangentLambda = Vector2DotProduct(tangent * -1, velA) + (Vector2DotProduct(tangent * -1, radPerpA) * angVelA) + Vector2DotProduct(tangent, velB) + (Vector2DotProduct(tangent, radPerpB) * angVelB);
+
+    float oldTangentSum = collision.tangentLambdaSum;
+    collision.tangentLambdaSum = std::clamp(collision.tangentLambdaSum + tangentLambda, -collision.lambdaSum * friction, collision.lambdaSum * friction);
+
+    tangentLambda = collision.tangentLambdaSum - oldTangentSum;
+
+    collision.frictionalImpulseA += (tangent * -invMassA) * tangentLambda;
+    collision.frictionalImpulseB += (tangent * -invMassA) * tangentLambda;
+
 
     collision.impulseVelA += (norm * -invMassA) * lambda;
     collision.impulseAngVelA += Vector2DotProduct(norm * -1, radPerpA) * invMOIA * lambda;
@@ -603,11 +617,11 @@ void Simulation::Step(float DeltaTime) {
     for (int i = 0; i < collisionCount; i++) {
         PrintVectorText(collisions[i].impulseVelA);
 
-        collisions[i].bodyA->vel += collisions[i].impulseVelA * (1 + elasticity);
+        collisions[i].bodyA->vel += collisions[i].impulseVelA * (1 + elasticity) + (collisions[i].worldTangent * -1) * collisions[i].tangentLambdaSum;
         collisions[i].bodyA->angVel += collisions[i].impulseAngVelA * (1 + elasticity);
 
         if (collisions[i].bodyB) {
-            collisions[i].bodyB->vel += collisions[i].impulseVelB * (1 + elasticity);
+            collisions[i].bodyB->vel += collisions[i].impulseVelB * (1 + elasticity) + (collisions[i].worldTangent) * collisions[i].tangentLambdaSum;
             collisions[i].bodyB->angVel += collisions[i].impulseAngVelB * (1 + elasticity);
         }
     }
