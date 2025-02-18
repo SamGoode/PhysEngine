@@ -38,7 +38,7 @@ RigidCircle::RigidCircle(Vector2 _pos, float _mass, float _radius) {
     rot = 0.f;
     angVel = 0.f;
     angAcc = 0.f;
-    invMOI = isStatic ? 0.f : 1 / (_mass * _radius * _radius * _radius * _radius * 0.25f);
+    invMOI = isStatic ? 0.f : 1 / (_mass * _radius * _radius * 0.5f);
 
     radius = _radius;
 }
@@ -47,4 +47,8 @@ void RigidCircle::Draw() {
     Color color = BLUE;
     if (isStatic) { color = GREEN; }
     DrawCircle(pos.x, pos.y, radius, color);
+
+    Vector2 endPos = pos + Vector2Rotate({ 1.f, 0.f }, rot) * radius;
+
+    DrawLine(pos.x, pos.y, endPos.x, endPos.y, BLACK);
 }

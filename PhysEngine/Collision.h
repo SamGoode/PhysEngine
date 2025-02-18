@@ -9,7 +9,6 @@ struct Collision {
     RigidBody* bodyB = nullptr;
 
     Vector2 worldNormal = { 0.f, 0.f };
-    Vector2 worldTangent = { 0.f, 0.f };
     Vector2 pointA = { 0.f, 0.f };
     Vector2 pointB = { 0.f, 0.f };
     float depth = 0.f;
