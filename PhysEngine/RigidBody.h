@@ -6,6 +6,8 @@
 
 class RigidBody {
 public:
+    bool isStatic;
+
     Vector2 pos;
     Vector2 vel;
     Vector2 acc;
@@ -16,22 +18,20 @@ public:
     float angAcc;
     float invMOI;
 
-    bool isStatic;
-
 public:
     RigidBody() {}
 
-    void SetStatic() {
-        vel = { 0.f, 0.f };
-        acc = { 0.f, 0.f };
-        invMass = 0.f;
+    //void SetStatic() {
+    //    vel = { 0.f, 0.f };
+    //    acc = { 0.f, 0.f };
+    //    invMass = 0.f;
 
-        angVel = 0.f;
-        angAcc = 0.f;
-        invMOI = 0.f;
+    //    angVel = 0.f;
+    //    angAcc = 0.f;
+    //    invMOI = 0.f;
 
-        isStatic = true;
-    }
+    //    isStatic = true;
+    //}
 
     virtual int GetID() = 0;
     virtual void Draw() = 0;

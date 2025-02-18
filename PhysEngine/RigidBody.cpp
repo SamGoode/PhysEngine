@@ -4,17 +4,17 @@
 
 
 RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation) {
+    isStatic = (_mass <= 0.f);
+    
     pos = _pos;
     vel = { 0.f, 0.f };
     acc = { 0.f, 0.f };
-    invMass = 1 / _mass;
+    invMass = isStatic ? 0.f : (1.f / _mass);
 
     rot = _rotation;
     angVel = 0.f;
     angAcc = 0.f;
-    invMOI = 1 / (_mass * _width * _width + _height * _height * (1.f / 12.f));
-
-    isStatic = false;
+    invMOI = isStatic ? 0.f : 1.f / (_mass * _width * _width + _height * _height * (1.f / 12.f));
 
     width = _width;
     height = _height;
@@ -28,17 +28,17 @@ void RigidRect::Draw() {
 
 
 RigidCircle::RigidCircle(Vector2 _pos, float _mass, float _radius) {
+    isStatic = (_mass <= 0.f);
+    
     pos = _pos;
     vel = { 0.f, 0.f };
     acc = { 0.f, 0.f };
-    invMass = 1 / _mass;
+    invMass = isStatic ? 0.f : (1.f / _mass);
 
     rot = 0.f;
     angVel = 0.f;
     angAcc = 0.f;
-    invMOI = 1 / (_mass * _radius * _radius * _radius * _radius * 0.25f);
-
-    isStatic = false;
+    invMOI = isStatic ? 0.f : 1 / (_mass * _radius * _radius * _radius * _radius * 0.25f);
 
     radius = _radius;
 }
