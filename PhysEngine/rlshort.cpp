@@ -4,6 +4,7 @@
 #include <string>
 
 Vector2 operator*(const Vector2& a, const float& b) { return { a.x * b, a.y * b }; }
+Vector2 operator/(const Vector2& a, const float& b) { return b == 0.f ? Vector2{ 0.f, 0.f } : Vector2{ a.x / b, a.y / b }; }
 Vector2 operator+(const Vector2& a, const Vector2& b) { return { a.x + b.x, a.y + b.y }; }
 Vector2 operator-(const Vector2& a, const Vector2& b) { return { a.x - b.x, a.y - b.y }; }
 Vector2& operator+=(Vector2& a, const Vector2& b) { a = a + b; return a; }

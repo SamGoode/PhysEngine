@@ -17,3 +17,13 @@ struct Collision {
 
     float tangentLambdaSum = 0.f;
 };
+
+struct Joint {
+    RigidBody* bodyA = nullptr;
+    RigidBody* bodyB = nullptr;
+
+    Vector2 localA = { 0.f, 0.f };
+    Vector2 localB = { 0.f, 0.f };
+
+    float lambdaSum = 0.f;
+};

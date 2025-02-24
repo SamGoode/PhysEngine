@@ -9,11 +9,12 @@
 
 
 #define MAX_COLLISIONS 64
+#define MAX_JOINTS 16
 
 class Simulation {
 private:
     Vector4 boundary = { 0.f, 0.f, 1800.f, 900.f };
-    Vector2 gravity = { 0.f, 200.f };
+    Vector2 gravity = { 0.f, 0.f };
 
     int solverIterations = 4;
 
@@ -31,6 +32,10 @@ private:
     const int maxCollisions = MAX_COLLISIONS;
     Collision collisions[MAX_COLLISIONS];
 
+    int jointCount = 0;
+    const int maxJoints = MAX_JOINTS;
+    Joint joints[MAX_JOINTS];
+
 public:
     Simulation();
     ~Simulation() { for (int i = 0; i < rigidBodyCount; i++) { delete bodies[i]; } }
@@ -45,6 +50,10 @@ public:
     void CheckCollisionRR(RigidBody* A, RigidBody* B);
     void CheckCollisionRC(RigidBody* A, RigidBody* B);
     void CheckCollisionCC(RigidBody* A, RigidBody* B);
+
+    void SolveJoint(Joint& joint, float DeltaTime);
+
+    void ApplyTorque(Joint& joint, float torque);
 
     void SolvePosition(Collision& collision);
 

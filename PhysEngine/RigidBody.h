@@ -18,6 +18,11 @@ public:
     float angAcc;
     float invMOI;
 
+    RigidBody* jointBody = nullptr;
+    RigidBody* jointBodyA = nullptr;
+
+    Color color = BLUE;
+
 public:
     RigidBody() {}
 
@@ -32,6 +37,10 @@ public:
 
     //    isStatic = true;
     //}
+
+    void setColor(Color newColor) {
+        color = newColor;
+    }
 
     virtual int GetID() = 0;
     virtual void Draw() = 0;
