@@ -14,7 +14,7 @@ RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, flo
     rot = _rotation;
     angVel = 0.f;
     angAcc = 0.f;
-    invMOI = isStatic ? 0.f : 1.f / (_mass * _width * _width + _height * _height * (1.f / 12.f));
+    invMOI = isStatic ? 0.f : 1.f / (_mass * (_width * _width + _height * _height) * (1.f / 12.f));
 
     width = _width;
     height = _height;

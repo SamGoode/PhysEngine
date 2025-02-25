@@ -51,7 +51,8 @@ public:
     void CheckCollisionRC(RigidBody* A, RigidBody* B);
     void CheckCollisionCC(RigidBody* A, RigidBody* B);
 
-    void SolveJoint(Joint& joint, float DeltaTime);
+    void SolveJointPosition(Joint& joint);
+    void SolveJoint(Joint& joint);
 
     void ApplyTorque(Joint& joint, float torque);
 
