@@ -15,10 +15,10 @@ Simulation::Simulation() {
     AddRigidBody(new RigidRect({ 900.f, 400.f }, 500.f, 100.f, 100.f, 0.f));
     AddRigidBody(new RigidRect({ 850.f, 450.f }, 500.f, 100.f, 100.f, 0.f));
     //AddRigidBody(new RigidRect({ 1050.f, 480.f }, 200.f, 100.f, 100.f, 0.f));
+    //AddRigidBody(new RigidCircle({ 850.f, 450.f }, 500.f, 50.f));
 
     bodies[1]->setColor(PURPLE);
     //bodies[2]->setColor(PURPLE);
-    //AddRigidBody(new RigidCircle({ 1050.f, 480.f }, 500.f, 50.f));
     //AddRigidBody(new RigidRect({ 1100.f, 200.f }, 500.f, 200.f, 25.f, -PI / 3));
     ////AddRigidBody(new RigidRect({ 800.f, 200.f }, 300.f, 100.f, 100.f, PI / 3));
 
@@ -744,8 +744,6 @@ void Simulation::SolveJointPosition(Joint& joint) {
     RigidBody* A = joint.bodyA;
     RigidBody* B = joint.bodyB;
 
-    //Vector2 norm = joint.worldNormal;
-
     float invMassA = A->invMass;
     float invMOIA = A->invMOI;
 
@@ -762,10 +760,7 @@ void Simulation::SolveJointPosition(Joint& joint) {
     Vector2 pointB = B->pos + radB;
 
     Vector2 AtoB = pointA - pointB;
-    //float depth = Vector2Length(AtoB);
-    //Vector2 norm = Vector2Normalize(B->pos - A->pos);
 
-    //float bias = std::max(depth - biasSlop, 0.f) * (biasFactor / DeltaTime);
     float a = invMassA + invMassB + (radA.y * radA.y * invMOIA) + (radB.y * radB.y * invMOIB);
     float b = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
     float c = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
@@ -782,12 +777,6 @@ void Simulation::SolveJointPosition(Joint& joint) {
     float y = -c * AtoB.x + a * AtoB.y;
     
     Vector2 impulse = Vector2{ x, y } * biasFactor;
-
-
-    //float effMass = invMassA + (Vector2DotProduct(AtoB, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
-
-    //float lambda = -std::max(depth - biasSlop, 0.f) * biasFactor / effMass;
-    //Vector2 lambda = AtoB * biasFactor / effMass;
 
     A->pos += impulse * -invMassA;
     A->rot += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
@@ -818,20 +807,9 @@ void Simulation::SolveJoint(Joint& joint) {
     Vector2 radB = Vector2Rotate(joint.localB, B->rot);
     Vector2 radPerpB = { -radB.y, radB.x };
 
-    Vector2 pointA = A->pos + radA;
-    Vector2 pointB = B->pos + radB;
-
-    Vector2 AtoB = pointB - pointA;
-    //float depth = Vector2Length(AtoB);
-    //Vector2 norm = Vector2Normalize(AtoB);
-
-    //Vector2 bias = AtoB * (-biasFactor / DeltaTime);
 
     Vector2 relVel = (velA * -1) + (radPerpA * -angVelA) + velB + (radPerpB * angVelB);
-    //float effMass = invMassA + (Vector2DotProduct(radPerpA, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(radPerpB, radPerpB) * invMOIB);
-
     relVel = relVel * -1;
-    //relVel += bias;
 
     float a = invMassA + invMassB + (radA.y * radA.y * invMOIA) + (radB.y * radB.y * invMOIB);
     float b = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
@@ -850,13 +828,17 @@ void Simulation::SolveJoint(Joint& joint) {
 
     Vector2 impulse = { x, y };
 
-    PrintVectorText(impulse);
+    Vector2 deltaVelA = (impulse * invMassA * -1.f);
+    A->vel += deltaVelA;
+    std::cout << "A velocity: ";
+    PrintVectorText(deltaVelA);
+    A->angVel += Vector2DotProduct(impulse * -1.f, radPerpA) * invMOIA;
 
-    A->vel += (impulse * -invMassA);
-    A->angVel += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
-
-    B->vel += (impulse * invMassB);
-    B->angVel += Vector2DotProduct(impulse * 1, radPerpB) * invMOIB;
+    Vector2 deltaVelB = (impulse * invMassB);
+    B->vel += deltaVelB;
+    std::cout << "B velocity: ";
+    PrintVectorText(deltaVelB);
+    B->angVel += Vector2DotProduct(impulse, radPerpB) * invMOIB;
 }
 
 void Simulation::ApplyTorque(Joint& joint, float torque) {
@@ -887,14 +869,14 @@ void Simulation::ApplyTorque(Joint& joint, float torque) {
     float sqrLengthA = Vector2LengthSqr(radPerpA);
     Vector2 radPerpScaledA = radPerpA / sqrLengthA;
 
-    A->acc += radPerpScaledA * torque * invMassA;
-    A->angAcc += invMOIA * torque;
+    A->vel += radPerpScaledA * torque * invMassA;
+    A->angVel += invMOIA * torque;
 
     float sqrLengthB = Vector2LengthSqr(radPerpB);
     Vector2 radPerpScaledB = radPerpB / sqrLengthB;
     
-    B->acc += radPerpScaledB * -torque * invMassB;
-    B->angAcc += invMOIB * -torque;
+    B->vel += radPerpScaledB * -torque * invMassB;
+    B->angVel += invMOIB * -torque;
     
 
     //A->angAcc += std::max(Vector2Length(radPerpA), 1.f) * invMOIA * -torque;
@@ -923,19 +905,19 @@ void Simulation::Step(float DeltaTime) {
 
     if (IsKeyDown(KEY_RIGHT)) {
         for (int i = 0; i < jointCount; i++) {
-            ApplyTorque(joints[i], -1000000);
+            ApplyTorque(joints[i], -10000);
         }
     }
     if (IsKeyDown(KEY_LEFT)) {
         for (int i = 0; i < jointCount; i++) {
-            ApplyTorque(joints[i], 1000000);
+            ApplyTorque(joints[i], 10000);
         }
     }
 
     // Solve joint positions
     for (int i = 0; i < solverIterations; i++) {
         for (int n = 0; n < jointCount; n++) {
-            SolveJointPosition(joints[n]);
+            //SolveJointPosition(joints[n]);
         }
     }
 
@@ -1038,4 +1020,10 @@ void Simulation::Draw() {
 
     DrawText(std::to_string(bodies[0]->rot).c_str(), 20, 150, 20, BLUE);
     DrawText(std::to_string(bodies[0]->angVel).c_str(), 20, 200, 20, BLUE);
+
+    DrawVectorText(bodies[1]->pos, 420, 50, 20, BLUE);
+    DrawVectorText(bodies[1]->vel, 420, 100, 20, BLUE);
+
+    DrawText(std::to_string(bodies[1]->rot).c_str(), 420, 150, 20, BLUE);
+    DrawText(std::to_string(bodies[1]->angVel).c_str(), 420, 200, 20, BLUE);
 }

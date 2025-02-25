@@ -19,7 +19,7 @@ private:
     int solverIterations = 4;
 
     float biasSlop = 0.5f;
-    float biasFactor = 0.2f;
+    float biasFactor = 0.1f;
 
     float elasticity = 0.f;
     float friction = 0.8f;

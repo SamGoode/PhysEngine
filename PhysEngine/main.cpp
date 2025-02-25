@@ -25,9 +25,9 @@ int main() {
 
         Vector2 mouse = GetMousePosition();
 
-        if (DeltaTime > 0.f) {
-            sim.Step(DeltaTime);
-        }
+        //if (DeltaTime > 0.f) {
+        sim.Step(0.005f);
+        //}
         
         
         // Drawing
