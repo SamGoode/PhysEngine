@@ -850,37 +850,48 @@ void Simulation::ApplyTorque(Joint& joint, float torque) {
 
     Vector2 radA = Vector2Rotate(joint.localA, A->rot);
     Vector2 radPerpA = { -radA.y, radA.x };
+    radPerpA = radPerpA * -1;
 
     float invMassB = B->invMass;
     float invMOIB = B->invMOI;
 
     Vector2 radB = Vector2Rotate(joint.localB, B->rot);
     Vector2 radPerpB = { -radB.y, radB.x };
+    radPerpB = radPerpB * -1;
 
-    Vector2 pointA = A->pos + radA;
-    Vector2 pointB = B->pos + radB;
+
+    //Vector2 pointA = A->pos + radA;
+    //Vector2 pointB = B->pos + radB;
 
     //Vector2 AtoB = pointB - pointA;
     //float depth = Vector2Length(AtoB);
-    //Vector2 norm = Vector2Normalize(AtoB);
+    Vector2 norm = Vector2Normalize(B->pos - A->pos);
 
     //float force = torque;
 
-    float sqrLengthA = Vector2LengthSqr(radPerpA);
-    Vector2 radPerpScaledA = radPerpA / sqrLengthA;
+    //float sqrLengthA = Vector2LengthSqr(radPerpA);
+    //Vector2 radPerpScaledA = radPerpA / sqrLengthA;
 
-    A->vel += radPerpScaledA * torque * invMassA;
-    A->angVel += invMOIA * torque;
+    //A->vel += radPerpScaledA * torque * invMassA;
+    //A->angVel += invMOIA * torque;
 
-    float sqrLengthB = Vector2LengthSqr(radPerpB);
-    Vector2 radPerpScaledB = radPerpB / sqrLengthB;
+    //float sqrLengthB = Vector2LengthSqr(radPerpB);
+    //Vector2 radPerpScaledB = radPerpB / sqrLengthB;
+    //
+    //B->vel += radPerpScaledB * -torque * invMassB;
+    //B->angVel += invMOIB * -torque;
     
-    B->vel += radPerpScaledB * -torque * invMassB;
-    B->angVel += invMOIB * -torque;
-    
+    //float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpA) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
+    //float effMass = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
 
-    //A->angAcc += std::max(Vector2Length(radPerpA), 1.f) * invMOIA * -torque;
-    //B->angAcc += std::max(Vector2Length(radPerpB), 1.f) * invMOIB * torque;
+    float lambda = -torque;
+
+    A->acc += (norm * -invMassA) * lambda;
+    A->angAcc += Vector2Length(radPerpA) * invMOIA * -lambda;
+
+    B->acc += (norm * invMassB) * lambda;
+    B->angAcc += Vector2Length(radPerpB) * invMOIB * lambda;
+
 }
 
 
@@ -914,10 +925,11 @@ void Simulation::Step(float DeltaTime) {
         }
     }
 
+
     // Solve joint positions
     for (int i = 0; i < solverIterations; i++) {
         for (int n = 0; n < jointCount; n++) {
-            //SolveJointPosition(joints[n]);
+            SolveJointPosition(joints[n]);
         }
     }
 
@@ -927,6 +939,8 @@ void Simulation::Step(float DeltaTime) {
             SolveJoint(joints[n]);
         }
     }
+
+
 
     for (int i = 0; i < rigidBodyCount; i++) {
         RigidBody* A = bodies[i];
