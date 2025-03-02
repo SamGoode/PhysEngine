@@ -21,8 +21,8 @@ private:
     float biasSlop = 0.5f;
     float biasFactor = 0.1f;
 
-    float elasticity = 0.f;
-    float friction = 0.8f;
+    float elasticity = 0.3f;
+    float friction = 0.2f;
 
     RigidBody* bodies[64];
 
@@ -41,8 +41,9 @@ public:
     ~Simulation() { for (int i = 0; i < rigidBodyCount; i++) { delete bodies[i]; } }
 
     void AddRigidBody(RigidBody* newBody) { bodies[rigidBodyCount++] = newBody; }
+    void AddJoint(Joint joint) { joints[jointCount++] = joint; }
 
-    void AddCollision(Collision collision) { collisions[collisionCount] = collision; collisionCount++; }
+    void AddCollision(Collision collision) { collisions[collisionCount++] = collision; }
     void ClearCollisions() { collisionCount = 0; }
 
     void CheckBoundaryCollision(RigidBody* body);
@@ -52,9 +53,9 @@ public:
     void CheckCollisionCC(RigidBody* A, RigidBody* B);
 
     void SolveJointPosition(Joint& joint);
-    void SolveJoint(Joint& joint);
+    void SolveJointVelocity(Joint& joint);
 
-    void ApplyTorque(Joint& joint, float torque);
+    void ApplyAngularImpulse(Joint& joint, float angularImpulse);
 
     void SolvePosition(Collision& collision);
 

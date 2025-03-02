@@ -18,29 +18,15 @@ public:
     float angAcc;
     float invMOI;
 
-    RigidBody* jointBody = nullptr;
-    RigidBody* jointBodyA = nullptr;
-
     Color color = BLUE;
 
 public:
     RigidBody() {}
 
-    //void SetStatic() {
-    //    vel = { 0.f, 0.f };
-    //    acc = { 0.f, 0.f };
-    //    invMass = 0.f;
+    void SetColor(Color newColor) { color = newColor; }
 
-    //    angVel = 0.f;
-    //    angAcc = 0.f;
-    //    invMOI = 0.f;
-
-    //    isStatic = true;
-    //}
-
-    void setColor(Color newColor) {
-        color = newColor;
-    }
+    void ApplyImpulse(Vector2 impulse, Vector2 hitPos);
+    void ApplyAngularImpulse(float angularImpulse);
 
     virtual int GetID() = 0;
     virtual void Draw() = 0;

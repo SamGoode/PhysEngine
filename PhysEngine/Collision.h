@@ -14,7 +14,6 @@ struct Collision {
     float depth = 0.f;
 
     float lambdaSum = 0.f;
-
     float tangentLambdaSum = 0.f;
 };
 
@@ -24,6 +23,4 @@ struct Joint {
 
     Vector2 localA = { 0.f, 0.f };
     Vector2 localB = { 0.f, 0.f };
-
-    float lambdaSum = 0.f;
 };
