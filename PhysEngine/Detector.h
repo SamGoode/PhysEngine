@@ -21,4 +21,6 @@ public:
 
     void AddCollision(Collision collision) { collisions[collisionCount++] = collision; }
     void ClearCollisions() { collisionCount = 0; }
+
+    bool IsWithinBody(RigidBody* body, Vector2 pos);
 };

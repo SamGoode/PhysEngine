@@ -5,12 +5,11 @@
 #include "raymath.h"
 
 #include "RigidBody.h"
-#include "Collision.h"
-#include "Solver.h"
 #include "Detector.h"
+#include "Solver.h"
 
 
-#define MAX_COLLISIONS 64
+#define MAX_BODIES 64
 #define MAX_JOINTS 16
 
 class Simulation {
@@ -18,23 +17,20 @@ private:
     Vector4 boundary = { 0.f, 0.f, 1800.f, 900.f };
     Vector2 gravity = { 0.f, 200.f };
 
+    Detector d;
     Solver s;
 
-    Detector d;
-
-    RigidBody* bodies[64];
-
     int rigidBodyCount = 0;
-
-    //int collisionCount = 0;
-    //const int maxCollisions = MAX_COLLISIONS;
-    //Collision collisions[MAX_COLLISIONS];
+    const int maxBodies = MAX_BODIES;
+    RigidBody* bodies[MAX_BODIES];
 
     int jointCount = 0;
     const int maxJoints = MAX_JOINTS;
     Joint joints[MAX_JOINTS];
 
-    float motorImpulse = 20000;
+    MouseJoint mouseJoint;
+
+    float motorImpulse = 10000;
 
 public:
     Simulation();
@@ -43,14 +39,7 @@ public:
     void AddRigidBody(RigidBody* newBody) { bodies[rigidBodyCount++] = newBody; }
     void AddJoint(Joint joint) { joints[jointCount++] = joint; }
 
-    //void AddCollision(Collision collision) { collisions[collisionCount++] = collision; }
-    //void ClearCollisions() { collisionCount = 0; }
-
-    //void CheckBoundaryCollision(RigidBody* body);
-    //void CheckCollision(RigidBody* A, RigidBody* B);
-    //void CheckCollisionRR(RigidBody* A, RigidBody* B);
-    //void CheckCollisionRC(RigidBody* A, RigidBody* B);
-    //void CheckCollisionCC(RigidBody* A, RigidBody* B);
+    void ApplyAngularImpulse(Joint& joint, float angularImpulse);
 
     void InitialStep(float DeltaTime);
     void Step(float DeltaTime);

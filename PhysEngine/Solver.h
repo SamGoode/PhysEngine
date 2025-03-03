@@ -8,7 +8,7 @@ public:
     float biasFactor = 0.1f;
 
     float elasticity = 0.5f;
-    float friction = 0.9f;
+    float friction = 0.98f;
 
 public:
     //Solver(int _iterations, float _biasSlop, float _biasFactor, float _elasticity, float _friction);
@@ -23,7 +23,7 @@ public:
     void SolveJointPosition(struct Joint& joint);
     void SolveJointVelocity(Joint& joint);
 
-    void ApplyAngularImpulse(Joint& joint, float angularImpulse);
+    void SolveMouseJoint(struct MouseJoint& mouseJoint, float DeltaTime);
 
     void ApplyRestitution(Collision& collision);
 };

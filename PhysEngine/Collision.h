@@ -24,3 +24,9 @@ struct Joint {
     Vector2 localA = { 0.f, 0.f };
     Vector2 localB = { 0.f, 0.f };
 };
+
+struct MouseJoint {
+    RigidBody* bodyA = nullptr;
+
+    Vector2 localA = { 0.f, 0.f };
+};

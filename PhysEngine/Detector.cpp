@@ -354,4 +354,27 @@ void Detector::CheckCollisionCC(RigidBody* A, RigidBody* B) {
     }
 }
 
+bool Detector::IsWithinBody(RigidBody* body, Vector2 pos) {
+    switch (body->GetID()) {
+    case 0:
+    {
+        RigidRect* rect = dynamic_cast<RigidRect*>(body);
+
+        Vector2 toPos = Vector2Rotate(pos - rect->pos, -rect->rot);
+        Vector2 absToPos = { abs(toPos.x), abs(toPos.y) };
+
+        return (absToPos.x < rect->width / 2 && absToPos.y < rect->height / 2);
+    }
+        break;
+
+    case 1:
+        RigidCircle* circle = dynamic_cast<RigidCircle*>(body);
+
+        return Vector2DistanceSqr(circle->pos, pos) < circle->radius * circle->radius;
+        break;
+    }
+
+    return false;
+}
+
 

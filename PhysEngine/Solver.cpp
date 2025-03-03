@@ -395,12 +395,44 @@ void Solver::SolveJointVelocity(Joint& joint) {
     B->ApplyImpulse(impulse, B->pos + radB);
 }
 
-void Solver::ApplyAngularImpulse(Joint& joint, float angularImpulse) {
-    RigidBody* A = joint.bodyA;
-    RigidBody* B = joint.bodyB;
+void Solver::SolveMouseJoint(MouseJoint& mouseJoint, float DeltaTime) {
+    RigidBody* A = mouseJoint.bodyA;
 
-    A->ApplyAngularImpulse(-angularImpulse);
-    B->ApplyAngularImpulse(angularImpulse);
+    Vector2 velA = A->vel;
+    float angVelA = A->angVel;
+
+    float invMassA = A->invMass;
+    float invMOIA = A->invMOI;
+
+    Vector2 radA = Vector2Rotate(mouseJoint.localA, A->rot);
+    Vector2 radPerpA = { -radA.y, radA.x };
+    Vector2 pointA = A->pos + radA;
+
+    // Inverted
+    Vector2 biasVector = (GetMousePosition() - pointA) * biasFactor / DeltaTime;
+    
+
+    Vector2 relVel = (velA * -1) + (radPerpA * -angVelA);
+    relVel += biasVector;
+    relVel = relVel * -1;
+
+    float a = invMassA + (radA.y * radA.y * invMOIA);
+    float b = -(radA.x * radA.y * invMOIA);
+    float c = -(radA.x * radA.y * invMOIA);
+    float d = invMassA + (radA.x * radA.x * invMOIA);
+
+    float determinant = a * d - b * c;
+
+    a = a / determinant;
+    b = b / determinant;
+    c = c / determinant;
+    d = d / determinant;
+
+    Vector2 impulse;
+    impulse.x = d * relVel.x - b * relVel.y;
+    impulse.y = -c * relVel.x + a * relVel.y;
+
+    A->ApplyImpulse(impulse * -1, A->pos + radA);
 }
 
 void Solver::ApplyRestitution(Collision& collision) {
