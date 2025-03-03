@@ -7,6 +7,7 @@
 #include "RigidBody.h"
 #include "Collision.h"
 #include "Solver.h"
+#include "Detector.h"
 
 
 #define MAX_COLLISIONS 64
@@ -19,13 +20,15 @@ private:
 
     Solver s;
 
+    Detector d;
+
     RigidBody* bodies[64];
 
     int rigidBodyCount = 0;
 
-    int collisionCount = 0;
-    const int maxCollisions = MAX_COLLISIONS;
-    Collision collisions[MAX_COLLISIONS];
+    //int collisionCount = 0;
+    //const int maxCollisions = MAX_COLLISIONS;
+    //Collision collisions[MAX_COLLISIONS];
 
     int jointCount = 0;
     const int maxJoints = MAX_JOINTS;
@@ -40,14 +43,14 @@ public:
     void AddRigidBody(RigidBody* newBody) { bodies[rigidBodyCount++] = newBody; }
     void AddJoint(Joint joint) { joints[jointCount++] = joint; }
 
-    void AddCollision(Collision collision) { collisions[collisionCount++] = collision; }
-    void ClearCollisions() { collisionCount = 0; }
+    //void AddCollision(Collision collision) { collisions[collisionCount++] = collision; }
+    //void ClearCollisions() { collisionCount = 0; }
 
-    void CheckBoundaryCollision(RigidBody* body);
-    void CheckCollision(RigidBody* A, RigidBody* B);
-    void CheckCollisionRR(RigidBody* A, RigidBody* B);
-    void CheckCollisionRC(RigidBody* A, RigidBody* B);
-    void CheckCollisionCC(RigidBody* A, RigidBody* B);
+    //void CheckBoundaryCollision(RigidBody* body);
+    //void CheckCollision(RigidBody* A, RigidBody* B);
+    //void CheckCollisionRR(RigidBody* A, RigidBody* B);
+    //void CheckCollisionRC(RigidBody* A, RigidBody* B);
+    //void CheckCollisionCC(RigidBody* A, RigidBody* B);
 
     void InitialStep(float DeltaTime);
     void Step(float DeltaTime);

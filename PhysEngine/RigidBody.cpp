@@ -15,6 +15,25 @@ void RigidBody::ApplyAngularImpulse(float angularImpulse) {
     angVel += angularImpulse * invMOI;
 }
 
+void RigidBody::Update(float DeltaTime) {
+    if (isStatic) { return; }
+
+    vel += acc * DeltaTime * 0.5;
+    pos += vel * DeltaTime;
+    acc = { 0.f, 0.f };
+
+    angVel += angAcc * DeltaTime * 0.5;
+    rot += angVel * DeltaTime;
+    angAcc = 0.f;
+}
+
+void RigidBody::PrepUpdate(float DeltaTime) {
+    if (isStatic) { return; }
+
+    vel += acc * DeltaTime * 0.5;
+    angVel += angAcc * DeltaTime * 0.5;
+}
+
 
 RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation) {
     isStatic = (_mass <= 0.f);

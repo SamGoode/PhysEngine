@@ -30,7 +30,7 @@
     <ClCompile Include="Solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionRegistry.cpp">
+    <ClCompile Include="Detector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,7 +50,7 @@
     <ClInclude Include="Solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionRegistry.h">
+    <ClInclude Include="Detector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

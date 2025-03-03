@@ -141,7 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CollisionRegistry.cpp" />
+    <ClCompile Include="Detector.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="rlshort.cpp" />
@@ -150,7 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision.h" />
-    <ClInclude Include="CollisionRegistry.h" />
+    <ClInclude Include="Detector.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="rlshort.h" />
     <ClInclude Include="Simulation.h" />

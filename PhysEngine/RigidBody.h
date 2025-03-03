@@ -28,6 +28,9 @@ public:
     void ApplyImpulse(Vector2 impulse, Vector2 hitPos);
     void ApplyAngularImpulse(float angularImpulse);
 
+    void Update(float DeltaTime);
+    void PrepUpdate(float DeltaTime);
+
     virtual int GetID() = 0;
     virtual void Draw() = 0;
 };

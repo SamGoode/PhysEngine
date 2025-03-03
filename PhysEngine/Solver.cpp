@@ -324,7 +324,7 @@ void Solver::SolveJointPosition(Joint& joint) {
     Vector2 pointA = A->pos + radA;
     Vector2 pointB = B->pos + radB;
 
-    // Have to invert it.
+    // Have to invert it later.
     Vector2 AtoB = pointA - pointB;
 
     float a = invMassA + invMassB + (radA.y * radA.y * invMOIA) + (radB.y * radB.y * invMOIB);
@@ -339,10 +339,9 @@ void Solver::SolveJointPosition(Joint& joint) {
     c = c / determinant;
     d = d / determinant;
 
-    float x = d * AtoB.x - b * AtoB.y;
-    float y = -c * AtoB.x + a * AtoB.y;
-
-    Vector2 impulse = Vector2{ x, y } * biasFactor;
+    Vector2 impulse;
+    impulse.x = (d * AtoB.x - b * AtoB.y) * biasFactor;
+    impulse.y = (-c * AtoB.x + a * AtoB.y) * biasFactor;
 
     A->pos += impulse * -invMassA;
     A->rot += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
@@ -388,19 +387,12 @@ void Solver::SolveJointVelocity(Joint& joint) {
     c = c / determinant;
     d = d / determinant;
 
-    float x = d * relVel.x - b * relVel.y;
-    float y = -c * relVel.x + a * relVel.y;
-
-    Vector2 impulse = { x, y };
+    Vector2 impulse;
+    impulse.x = d * relVel.x - b * relVel.y;
+    impulse.y = -c * relVel.x + a * relVel.y;
 
     A->ApplyImpulse(impulse * -1, A->pos + radA);
     B->ApplyImpulse(impulse, B->pos + radB);
-
-    //A->vel += impulse * -invMassA;
-    //A->angVel += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
-
-    //B->vel += impulse * invMassB;
-    //B->angVel += Vector2DotProduct(impulse, radPerpB) * invMOIB;
 }
 
 void Solver::ApplyAngularImpulse(Joint& joint, float angularImpulse) {
