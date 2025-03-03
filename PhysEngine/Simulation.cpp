@@ -8,17 +8,27 @@
 #include "rlshort.h"
 
 #include "Collision.h"
+#include "Solver.h"
 
 
 Simulation::Simulation() {
     // Dynamic Objects
-    AddRigidBody(new RigidRect({ 900.f, 400.f }, 500.f, 400.f, 200.f, 0.f));
-    AddRigidBody(new RigidRect({ 750.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
-    AddRigidBody(new RigidRect({ 1050.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
-    //AddRigidBody(new RigidCircle({ 850.f, 450.f }, 500.f, 50.f));
+    
+    // Floating joint thing
+    //AddRigidBody(new RigidRect({ 900.f, 400.f }, 100.f, 100.f, 100.f, 0.f));
+    //AddRigidBody(new RigidRect({ 850.f, 450.f }, 100.f, 100.f, 100.f, 0.f));
+    //AddJoint({ bodies[0], bodies[1], {-25.f, 25.f}, {25.f, -25.f} });
 
-    bodies[1]->SetColor(PURPLE);
-    bodies[2]->SetColor(PURPLE);
+    // Car thing
+    AddRigidBody(new RigidRect({ 900.f, 400.f }, 1000.f, 400.f, 200.f, 0.f));
+    //AddRigidBody(new RigidRect({ 750.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
+    //AddRigidBody(new RigidRect({ 1050.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
+    AddRigidBody(new RigidCircle({ 750.f, 480.f }, 200.f, 50.f));
+    AddRigidBody(new RigidCircle({ 1050.f, 480.f }, 200.f, 50.f));
+    AddJoint({ bodies[0], bodies[1], {-150.f, 80.f}, {0.f, 0.f} });
+    AddJoint({ bodies[0], bodies[2], {150.f, 80.f}, {0.f, 0.f} });
+
+
     //AddRigidBody(new RigidRect({ 700.f, 200.f }, 400.f, 100.f, 100.f, PI / 3));
     //AddRigidBody(new RigidRect({ 1100.f, 200.f }, 500.f, 200.f, 25.f, -PI / 3));
     //AddRigidBody(new RigidCircle({ 700.f, 100.f }, 200.f, 50.f));
@@ -28,9 +38,8 @@ Simulation::Simulation() {
     //AddRigidBody(new RigidRect({ 1000.f, 600.f }, 0.f, 400.f, 50.f, -PI / 4));
     //AddRigidBody(new RigidCircle({ 900.f, 300.f }, 0.f, 50.f));
 
-    //AddJoint({ bodies[0], bodies[1], {-25.f, 25.f}, {25.f, -25.f} });
-    AddJoint({ bodies[0], bodies[1], {-150.f, 80.f}, {0.f, 0.f} });
-    AddJoint({ bodies[0], bodies[2], {150.f, 80.f}, {0.f, 0.f} });
+    bodies[1]->SetColor(PURPLE);
+    bodies[2]->SetColor(PURPLE);
 }
 
 
@@ -384,320 +393,6 @@ void Simulation::CheckCollision(RigidBody* A, RigidBody* B) {
 }
 
 
-
-
-void Simulation::SolveFriction(Collision& collision) {
-    RigidBody* A = collision.bodyA;
-    RigidBody* B = collision.bodyB;
-
-    Vector2 norm = collision.worldNormal;
-    Vector2 tangent = { -norm.y, norm.x };
-
-    Vector2 velA = A->vel;
-    float angVelA = A->angVel;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 radA = collision.pointA - A->pos;
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    Vector2 velB = { 0.f, 0.f };
-    float angVelB = 0.f;
-
-    float invMassB = 0.f;
-    float invMOIB = 0.f;
-
-    Vector2 radB = { 0.f, 0.f };
-    Vector2 radPerpB = { 0.f, 0.f };
-
-    if (B) {
-        velB = B->vel;
-        angVelB = B->angVel;
-
-        invMassB = B->invMass;
-        invMOIB = B->invMOI;
-
-        radB = collision.pointB - B->pos;
-        radPerpB = { -radB.y, radB.x };
-    }
-
-    float JV = Vector2DotProduct(tangent * -1, velA) + (Vector2DotProduct(tangent * -1, radPerpA) * angVelA) + Vector2DotProduct(tangent, velB) + (Vector2DotProduct(tangent, radPerpB) * angVelB);
-    float effMass = invMassA + (Vector2DotProduct(tangent * -1, radPerpA) * Vector2DotProduct(tangent * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(tangent, radPerpB) * Vector2DotProduct(tangent, radPerpB) * invMOIB);
-
-    float tangentLambda = -JV / effMass;
-
-    float maxFriction = collision.lambdaSum * friction;
-    float newSum = std::clamp(collision.tangentLambdaSum + tangentLambda, -maxFriction, maxFriction);
-
-    tangentLambda = newSum - collision.tangentLambdaSum;
-    collision.tangentLambdaSum += tangentLambda;
-
-    A->ApplyImpulse(tangent * -tangentLambda, collision.pointA);
-
-    if (B) { B->ApplyImpulse(tangent * tangentLambda, collision.pointB); }
-}
-
-void Simulation::SolveFrictionPair(Collision& collision1, Collision& collision2) {
-    RigidBody* A = collision1.bodyA;
-    RigidBody* B = collision1.bodyB;
-
-    Vector2 norm = collision1.worldNormal;
-    Vector2 tangent = { -norm.y, norm.x };
-
-    Vector2 velA = A->vel;
-    float angVelA = A->angVel;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 velB = { 0.f, 0.f };
-    float angVelB = 0.f;
-
-    float invMassB = 0.f;
-    float invMOIB = 0.f;
-
-    Vector2 radA = collision1.pointA - A->pos;
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    Vector2 radB = { 0.f, 0.f };
-    Vector2 radPerpB = { 0.f, 0.f };
-
-    Vector2 radC = collision2.pointA - A->pos;
-    Vector2 radPerpC = { -radC.y, radC.x };
-
-    Vector2 radD = { 0.f, 0.f };
-    Vector2 radPerpD = { 0.f, 0.f };
-
-    if (B) {
-        velB = B->vel;
-        angVelB = B->angVel;
-
-        invMassB = B->invMass;
-        invMOIB = B->invMOI;
-
-        radB = collision1.pointB - B->pos;
-        radPerpB = { -radB.y, radB.x };
-
-        radD = collision2.pointB - B->pos;
-        radPerpD = { -radD.y, radD.x };
-    }
-
-    float JV_1 = Vector2DotProduct(tangent * -1, velA) + (Vector2DotProduct(tangent * -1, radPerpA) * angVelA) + Vector2DotProduct(tangent, velB) + (Vector2DotProduct(tangent, radPerpB) * angVelB);
-    float JV_2 = Vector2DotProduct(tangent * -1, velA) + (Vector2DotProduct(tangent * -1, radPerpC) * angVelA) + Vector2DotProduct(tangent, velB) + (Vector2DotProduct(tangent, radPerpD) * angVelB);
-
-    float effMass1 = invMassA + (Vector2DotProduct(tangent * -1, radPerpA) * Vector2DotProduct(tangent * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(tangent, radPerpB) * Vector2DotProduct(tangent, radPerpB) * invMOIB);
-    float effMass2 = invMassA + (Vector2DotProduct(tangent * -1, radPerpC) * Vector2DotProduct(tangent * -1, radPerpC) * invMOIA) + invMassB + (Vector2DotProduct(tangent, radPerpD) * Vector2DotProduct(tangent, radPerpD) * invMOIB);
-
-    float tangentLambda1 = -JV_1 / effMass1;
-    float tangentLambda2 = -JV_2 / effMass2;
-
-    if (abs(tangentLambda1) < 0.01f && abs(tangentLambda2) < 0.01f) { return; }
-
-    float maxFriction = abs(collision1.lambdaSum + collision2.lambdaSum) * friction * 0.5;
-
-    float combinedSum1 = std::clamp(collision1.tangentLambdaSum + tangentLambda1, -maxFriction, maxFriction);
-    float combinedSum2 = std::clamp(collision2.tangentLambdaSum + tangentLambda2, -maxFriction, maxFriction);
-
-    tangentLambda1 = combinedSum1 - collision1.tangentLambdaSum;
-    tangentLambda2 = combinedSum2 - collision2.tangentLambdaSum;
-
-    collision1.tangentLambdaSum += tangentLambda1;
-    collision2.tangentLambdaSum += tangentLambda2;
-
-    A->ApplyImpulse(tangent * -tangentLambda1, collision1.pointA);
-    A->ApplyImpulse(tangent * -tangentLambda2, collision2.pointA);
-
-    if (B) {
-        B->ApplyImpulse(tangent * tangentLambda1, collision1.pointB);
-        B->ApplyImpulse(tangent * tangentLambda2, collision2.pointB);
-    }
-}
-
-void Simulation::SolvePosition(Collision& collision) {
-    RigidBody* A = collision.bodyA;
-    RigidBody* B = collision.bodyB;
-
-    Vector2 norm = collision.worldNormal;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 radA = collision.pointA - A->pos;
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    float invMassB = 0.f;
-    float invMOIB = 0.f;
-
-    Vector2 radB = { 0.f, 0.f };
-    Vector2 radPerpB = { 0.f, 0.f };
-
-    if (B) {
-        invMassB = B->invMass;
-        invMOIB = B->invMOI;
-
-        radB = collision.pointB - B->pos;
-        radPerpB = { -radB.y, radB.x };
-    }
-
-    float effMass = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
-    
-    float lambda = std::max(collision.depth - biasSlop, 0.f) * biasFactor/effMass;
-
-    A->pos += (norm * -invMassA) * lambda;
-    A->rot += Vector2DotProduct(norm * -1, radPerpA) * invMOIA * lambda;
-
-    if (B) {
-        B->pos += (norm * invMassB) * lambda;
-        B->rot += Vector2DotProduct(norm, radPerpB) * invMOIB * lambda;
-    }
-}
-
-void Simulation::SolveImpulse(Collision& collision) {
-    RigidBody* A = collision.bodyA;
-    RigidBody* B = collision.bodyB;
-    
-    Vector2 norm = collision.worldNormal;
-
-    Vector2 velA = A->vel;
-    float angVelA = A->angVel;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 radA = collision.pointA - A->pos;
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    Vector2 velB = { 0.f, 0.f };
-    float angVelB = 0.f;
-
-    float invMassB = 0.f;
-    float invMOIB = 0.f;
-
-    Vector2 radB = { 0.f, 0.f };
-    Vector2 radPerpB = { 0.f, 0.f };
-
-    if (B) {
-        velB = B->vel;
-        angVelB = B->angVel;
-
-        invMassB = B->invMass;
-        invMOIB = B->invMOI;
-
-        radB = collision.pointB - B->pos;
-        radPerpB = { -radB.y, radB.x };
-    }
-
-    float JV = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpA) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
-    float effMass = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
-
-    float lambda = -JV / effMass;
-    float newSum = std::max(collision.lambdaSum + lambda, 0.f);
-    
-    lambda = newSum - collision.lambdaSum;
-    collision.lambdaSum += lambda;
-
-    A->ApplyImpulse(norm * -lambda, collision.pointA);
-    if (B) { B->ApplyImpulse(norm * lambda, collision.pointB); }
-}
-
-void Simulation::SolveImpulsePair(Collision& collision1, Collision& collision2) {
-    RigidBody* A = collision1.bodyA;
-    RigidBody* B = collision1.bodyB;
-
-    Vector2 norm = collision1.worldNormal;
-
-    Vector2 velA = A->vel;
-    float angVelA = A->angVel;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 velB = { 0.f, 0.f };
-    float angVelB = 0.f;
-
-    float invMassB = 0.f;
-    float invMOIB = 0.f;
-
-    Vector2 radA = collision1.pointA - A->pos;
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    Vector2 radB = { 0.f, 0.f };
-    Vector2 radPerpB = { 0.f, 0.f };
-
-    Vector2 radC = collision2.pointA - A->pos;
-    Vector2 radPerpC = { -radC.y, radC.x };
-
-    Vector2 radD = { 0.f, 0.f };
-    Vector2 radPerpD = { 0.f, 0.f };
-
-    if (B) {
-        velB = B->vel;
-        angVelB = B->angVel;
-
-        invMassB = B->invMass;
-        invMOIB = B->invMOI;
-
-        radB = collision1.pointB - B->pos;
-        radPerpB = { -radB.y, radB.x };
-
-        radD = collision2.pointB - B->pos;
-        radPerpD = { -radD.y, radD.x };
-    }
-    
-    float JV_1 = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpA) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpB) * angVelB);
-    float JV_2 = Vector2DotProduct(norm * -1, velA) + (Vector2DotProduct(norm * -1, radPerpC) * angVelA) + Vector2DotProduct(norm, velB) + (Vector2DotProduct(norm, radPerpD) * angVelB);
-
-    float a = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpB) * invMOIB);
-    float b = invMassA + (Vector2DotProduct(norm * -1, radPerpC) * Vector2DotProduct(norm * -1, radPerpA) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpD) * Vector2DotProduct(norm, radPerpB) * invMOIB);
-    float c = invMassA + (Vector2DotProduct(norm * -1, radPerpA) * Vector2DotProduct(norm * -1, radPerpC) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpB) * Vector2DotProduct(norm, radPerpD) * invMOIB);
-    float d = invMassA + (Vector2DotProduct(norm * -1, radPerpC) * Vector2DotProduct(norm * -1, radPerpC) * invMOIA) + invMassB + (Vector2DotProduct(norm, radPerpD) * Vector2DotProduct(norm, radPerpD) * invMOIB);
-
-    float determinant = a * d - b * c;
-
-    a = a / determinant;
-    b = b / determinant;
-    c = c / determinant;
-    d = d / determinant;
-
-    float lambda1 = d * -JV_1 - b * -JV_2;
-    float lambda2 = - c * -JV_1 + a * -JV_2;
-
-    if (abs(lambda1) < 0.01f && abs(lambda2) < 0.01f) { return; }
-
-    float combinedSum = std::max(collision1.lambdaSum + collision2.lambdaSum + lambda1 + lambda2, 0.f);
-
-    lambda1 = combinedSum - collision1.lambdaSum - collision2.lambdaSum - lambda2;
-    lambda2 = combinedSum - collision1.lambdaSum - collision2.lambdaSum - lambda1;
-
-    collision1.lambdaSum += lambda1;
-    collision2.lambdaSum += lambda2;
-
-    std::cout << "lambda1: " << lambda1 << std::endl;
-
-    std::cout << "lambda2: " << lambda2 << std::endl;
-
-    A->ApplyImpulse(norm * -lambda1, collision1.pointA);
-    A->ApplyImpulse(norm * -lambda2, collision2.pointA);
-
-    if (B) {
-        B->ApplyImpulse(norm * lambda1, collision1.pointB);
-        B->ApplyImpulse(norm * lambda2, collision2.pointB);
-    }
-}
-
-void Simulation::ApplyRestitution(Collision& collision) {
-    Vector2 norm = collision.worldNormal;
-    float lambda = collision.lambdaSum;
-
-    RigidBody* A = collision.bodyA;
-    RigidBody* B = collision.bodyB;
-
-    A->ApplyImpulse(norm * -lambda * elasticity, collision.pointA);
-    if (B) { B->ApplyImpulse(norm * lambda * elasticity, collision.pointB); }
-}
-
-
 void Simulation::InitialStep(float DeltaTime) {
     for (int i = 0; i < rigidBodyCount; i++) {
         RigidBody* body = bodies[i];
@@ -712,111 +407,6 @@ void Simulation::InitialStep(float DeltaTime) {
         body->rot += body->angVel * DeltaTime + body->angAcc * (DeltaTime * DeltaTime * 0.5);
         body->angVel += body->angAcc * DeltaTime;
     }
-}
-
-
-void Simulation::SolveJointPosition(Joint& joint) {
-    RigidBody* A = joint.bodyA;
-    RigidBody* B = joint.bodyB;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 radA = Vector2Rotate(joint.localA, A->rot);
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    float invMassB = B->invMass;
-    float invMOIB = B->invMOI;
-
-    Vector2 radB = Vector2Rotate(joint.localB, B->rot);
-    Vector2 radPerpB = { -radB.y, radB.x };
-
-    Vector2 pointA = A->pos + radA;
-    Vector2 pointB = B->pos + radB;
-
-    // Have to invert it.
-    Vector2 AtoB = pointA - pointB;
-
-    float a = invMassA + invMassB + (radA.y * radA.y * invMOIA) + (radB.y * radB.y * invMOIB);
-    float b = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
-    float c = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
-    float d = invMassA + invMassB + (radA.x * radA.x * invMOIA) + (radB.x * radB.x * invMOIB);
-
-    float determinant = a * d - b * c;
-
-    a = a / determinant;
-    b = b / determinant;
-    c = c / determinant;
-    d = d / determinant;
-
-    float x = d * AtoB.x - b * AtoB.y;
-    float y = -c * AtoB.x + a * AtoB.y;
-    
-    Vector2 impulse = Vector2{ x, y } * biasFactor;
-
-    A->pos += impulse * -invMassA;
-    A->rot += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
-
-    B->pos += (impulse * invMassB);
-    B->rot += Vector2DotProduct(impulse, radPerpB) * invMOIB;
-}
-
-void Simulation::SolveJointVelocity(Joint& joint) {
-    RigidBody* A = joint.bodyA;
-    RigidBody* B = joint.bodyB;
-
-    Vector2 velA = A->vel;
-    float angVelA = A->angVel;
-
-    float invMassA = A->invMass;
-    float invMOIA = A->invMOI;
-
-    Vector2 radA = Vector2Rotate(joint.localA, A->rot);
-    Vector2 radPerpA = { -radA.y, radA.x };
-
-    Vector2 velB = B->vel;
-    float angVelB = B->angVel;
-
-    float invMassB = B->invMass;
-    float invMOIB = B->invMOI;
-
-    Vector2 radB = Vector2Rotate(joint.localB, B->rot);
-    Vector2 radPerpB = { -radB.y, radB.x };
-
-
-    Vector2 relVel = (velA * -1) + (radPerpA * -angVelA) + velB + (radPerpB * angVelB);
-    relVel = relVel * -1;
-
-    float a = invMassA + invMassB + (radA.y * radA.y * invMOIA) + (radB.y * radB.y * invMOIB);
-    float b = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
-    float c = -(radA.x * radA.y * invMOIA) - (radB.x * radB.y * invMOIB);
-    float d = invMassA + invMassB + (radA.x * radA.x * invMOIA) + (radB.x * radB.x * invMOIB);
-
-    float determinant = a * d - b * c;
-
-    a = a / determinant;
-    b = b / determinant;
-    c = c / determinant;
-    d = d / determinant;
-
-    float x = d * relVel.x - b * relVel.y;
-    float y = -c * relVel.x + a * relVel.y;
-
-    Vector2 impulse = { x, y };
-
-    A->vel += impulse * -invMassA;
-    A->angVel += Vector2DotProduct(impulse * -1, radPerpA) * invMOIA;
-
-    B->vel += impulse * invMassB;
-    B->angVel += Vector2DotProduct(impulse, radPerpB) * invMOIB;
-}
-
-void Simulation::ApplyAngularImpulse(Joint& joint, float angularImpulse) {
-    RigidBody* A = joint.bodyA;
-    RigidBody* B = joint.bodyB;
-
-    A->ApplyAngularImpulse(-angularImpulse);
-    B->ApplyAngularImpulse(angularImpulse);
 }
 
 
@@ -841,31 +431,28 @@ void Simulation::Step(float DeltaTime) {
 
     if (IsKeyDown(KEY_RIGHT)) {
         for (int i = 0; i < jointCount; i++) {
-            ApplyAngularImpulse(joints[i], 10000);
+            s.ApplyAngularImpulse(joints[i], motorImpulse);
         }
     }
     if (IsKeyDown(KEY_LEFT)) {
         for (int i = 0; i < jointCount; i++) {
-            ApplyAngularImpulse(joints[i], -10000);
+            s.ApplyAngularImpulse(joints[i], -motorImpulse);
         }
     }
 
-
     // Solve joint positions
-    for (int i = 0; i < solverIterations; i++) {
+    for (int i = 0; i < s.iterations; i++) {
         for (int n = 0; n < jointCount; n++) {
-            SolveJointPosition(joints[n]);
+            s.SolveJointPosition(joints[n]);
         }
     }
 
     // Solve joint velocity
-    for (int i = 0; i < solverIterations; i++) {
+    for (int i = 0; i < s.iterations; i++) {
         for (int n = 0; n < jointCount; n++) {
-            SolveJointVelocity(joints[n]);
+            s.SolveJointVelocity(joints[n]);
         }
     }
-
-
 
     for (int i = 0; i < rigidBodyCount; i++) {
         RigidBody* A = bodies[i];
@@ -899,44 +486,44 @@ void Simulation::Step(float DeltaTime) {
     }
     
     // Sequential Position Solver
-    for (int i = 0; i < solverIterations; i++) {
+    for (int i = 0; i < s.iterations; i++) {
         for (int n = 0; n < collisionCount; n++) {
-            SolvePosition(collisions[n]);
+            s.SolvePosition(collisions[n]);
         }
     }
 
     // Sequential Impulse Solver
-    for (int i = 0; i < solverIterations; i++) {
+    for (int i = 0; i < s.iterations; i++) {
         // Apply Friction Impulses
         for (int n = 0; n < collisionCount; n++) {
             if (n + 1 < collisionCount) {
                 if (collisions[n].bodyA == collisions[n + 1].bodyA && collisions[n].bodyB == collisions[n + 1].bodyB && collisions[n].worldNormal == collisions[n + 1].worldNormal) {
-                    SolveFrictionPair(collisions[n], collisions[n + 1]);
+                    s.SolveFrictionPair(collisions[n], collisions[n + 1]);
                     n++;
                     continue;
                 }
             }
 
-            SolveFriction(collisions[n]);
+            s.SolveFriction(collisions[n]);
         }
 
         // Apply Normal Impulses
         for (int n = 0; n < collisionCount; n++) {
             if (n + 1 < collisionCount) {
                 if (collisions[n].bodyA == collisions[n + 1].bodyA && collisions[n].bodyB == collisions[n + 1].bodyB && collisions[n].worldNormal == collisions[n + 1].worldNormal) {
-                    SolveImpulsePair(collisions[n], collisions[n + 1]);
+                    s.SolveImpulsePair(collisions[n], collisions[n + 1]);
                     n++;
                     continue;
                 }
             }
 
-            SolveImpulse(collisions[n]);
+            s.SolveImpulse(collisions[n]);
         }
     }
 
     // Apply Elastic Impulses
     for (int i = 0; i < collisionCount; i++) {
-        ApplyRestitution(collisions[i]);
+        s.ApplyRestitution(collisions[i]);
     }
 
     ClearCollisions();
@@ -970,9 +557,9 @@ void Simulation::Draw() {
     DrawText(std::to_string(bodies[0]->rot).c_str(), 20, 150, 20, BLUE);
     DrawText(std::to_string(bodies[0]->angVel).c_str(), 20, 200, 20, BLUE);
 
-    DrawVectorText(bodies[1]->pos, 420, 50, 20, BLUE);
-    DrawVectorText(bodies[1]->vel, 420, 100, 20, BLUE);
+    //DrawVectorText(bodies[1]->pos, 420, 50, 20, BLUE);
+    //DrawVectorText(bodies[1]->vel, 420, 100, 20, BLUE);
 
-    DrawText(std::to_string(bodies[1]->rot).c_str(), 420, 150, 20, BLUE);
-    DrawText(std::to_string(bodies[1]->angVel).c_str(), 420, 200, 20, BLUE);
+    //DrawText(std::to_string(bodies[1]->rot).c_str(), 420, 150, 20, BLUE);
+    //DrawText(std::to_string(bodies[1]->angVel).c_str(), 420, 200, 20, BLUE);
 }

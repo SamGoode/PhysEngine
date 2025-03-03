@@ -61,9 +61,12 @@ void RigidCircle::Draw() {
     if (isStatic) { color = GREEN; }
     DrawCircle(pos.x, pos.y, radius, color);
 
-    Vector2 endPos = pos + Vector2Rotate({ 1.f, 0.f }, rot) * radius;
+    Vector2 radial = Vector2Rotate({ 1.f, 0.f }, rot) * radius;
 
-    DrawLine(pos.x, pos.y, endPos.x, endPos.y, BLACK);
+    Vector2 startPos = pos - radial;
+    Vector2 endPos = pos + radial;
+
+    DrawLine(startPos.x, startPos.y, endPos.x, endPos.y, BLACK);
 }
 
 

@@ -6,6 +6,7 @@
 
 #include "RigidBody.h"
 #include "Collision.h"
+#include "Solver.h"
 
 
 #define MAX_COLLISIONS 64
@@ -14,15 +15,9 @@
 class Simulation {
 private:
     Vector4 boundary = { 0.f, 0.f, 1800.f, 900.f };
-    Vector2 gravity = { 0.f, 0.f };
+    Vector2 gravity = { 0.f, 200.f };
 
-    int solverIterations = 4;
-
-    float biasSlop = 0.5f;
-    float biasFactor = 0.1f;
-
-    float elasticity = 0.3f;
-    float friction = 0.2f;
+    Solver s;
 
     RigidBody* bodies[64];
 
@@ -35,6 +30,8 @@ private:
     int jointCount = 0;
     const int maxJoints = MAX_JOINTS;
     Joint joints[MAX_JOINTS];
+
+    float motorImpulse = 20000;
 
 public:
     Simulation();
@@ -51,21 +48,6 @@ public:
     void CheckCollisionRR(RigidBody* A, RigidBody* B);
     void CheckCollisionRC(RigidBody* A, RigidBody* B);
     void CheckCollisionCC(RigidBody* A, RigidBody* B);
-
-    void SolveJointPosition(Joint& joint);
-    void SolveJointVelocity(Joint& joint);
-
-    void ApplyAngularImpulse(Joint& joint, float angularImpulse);
-
-    void SolvePosition(Collision& collision);
-
-    void SolveFriction(Collision& collision);
-    void SolveFrictionPair(Collision& collision1, Collision& collision2);
-
-    void SolveImpulse(Collision& collision);
-    void SolveImpulsePair(Collision& collision1, Collision& collision2);
-
-    void ApplyRestitution(Collision& collision);
 
     void InitialStep(float DeltaTime);
     void Step(float DeltaTime);
