@@ -32,7 +32,7 @@ public:
     void PrepUpdate(float DeltaTime);
 
     virtual int GetID() = 0;
-    virtual void Draw() = 0;
+    virtual void Draw(float scale) = 0;
 };
 
 
@@ -46,7 +46,7 @@ public:
     RigidRect(Vector2 _pos, float _mass, float _width, float _height, float _rotation);
 
     virtual int GetID() override { return 0; };
-    virtual void Draw() override;
+    virtual void Draw(float scale) override;
 };
 
 
@@ -59,6 +59,6 @@ public:
     RigidCircle(Vector2 _pos, float _mass, float _radius);
 
     virtual int GetID() override { return 1; };
-    virtual void Draw() override;
+    virtual void Draw(float scale) override;
 };
 

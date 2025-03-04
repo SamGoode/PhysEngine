@@ -20,23 +20,24 @@ Simulation::Simulation() {
     //AddJoint({ bodies[0], bodies[1], {-25.f, 25.f}, {25.f, -25.f} });
 
     // Car thing
-    AddRigidBody(new RigidRect({ 800.f, 400.f }, 2000.f, 150.f, 75.f, 0.f));
+    AddRigidBody(new RigidRect({ 6.f, 2.f }, 200.f, 1.5f, 1.f, 0.f));
     //AddRigidBody(new RigidRect({ 750.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
     //AddRigidBody(new RigidRect({ 1050.f, 480.f }, 100.f, 100.f, 100.f, 0.f));
-    AddRigidBody(new RigidCircle({ 760.f, 430.f }, 200.f, 35.f));
-    AddRigidBody(new RigidCircle({ 840.f, 430.f }, 200.f, 35.f));
-    AddJoint({ bodies[0], bodies[1], {-40.f, 30.f}, {0.f, 0.f} });
-    AddJoint({ bodies[0], bodies[2], {40.f, 30.f}, {0.f, 0.f} });
+    AddRigidBody(new RigidCircle({ 5.93f, 2.04f }, 10.f, 0.3f));
+    AddRigidBody(new RigidCircle({ 6.07f, 2.04f }, 10.f, 0.3f));
+    AddJoint({ bodies[0], bodies[1], {-0.7f, 0.4f}, {0.f, 0.f} });
+    AddJoint({ bodies[0], bodies[2], {0.7f, 0.4f}, {0.f, 0.f} });
 
     // Random Objects
-    //AddRigidBody(new RigidRect({ 700.f, 200.f }, 400.f, 100.f, 100.f, PI / 3));
-    //AddRigidBody(new RigidRect({ 1100.f, 200.f }, 500.f, 200.f, 25.f, -PI / 3));
-    //AddRigidBody(new RigidCircle({ 700.f, 100.f }, 200.f, 50.f));
+    AddRigidBody(new RigidRect({ 7.f, 2.f }, 40.f, 1.f, 1.f, PI / 3));
+    AddRigidBody(new RigidRect({ 11.f, 2.f }, 50.f, 1.f, 2.5f, -PI / 3));
+    AddRigidBody(new RigidCircle({ 7.f, 1.f }, 20.f, 0.5f));
 
     // Static Objects
-    AddRigidBody(new RigidRect({ 700.f, 500.f }, 0.f, 500.f, 50.f, -PI / 12));
-    //AddRigidBody(new RigidRect({ 1100.f, 600.f }, 0.f, 500.f, 50.f, -PI / 4));
-    //AddRigidBody(new RigidCircle({ 900.f, 300.f }, 0.f, 50.f));
+    AddRigidBody(new RigidRect({ 1.f, 5.2f }, 0.f, 2.f, 0.5f, 0.f));
+    AddRigidBody(new RigidRect({ 4.f, 4.5f }, 0.f, 6.f, 0.5f, -PI / 12));
+    AddRigidBody(new RigidRect({ 16.f, 8.f }, 0.f, 5.f, 0.5f, -PI / 6));
+    AddRigidBody(new RigidCircle({ 8.f, 6.5f }, 0.f, 2.f));
 
     bodies[1]->SetColor(PURPLE);
     bodies[2]->SetColor(PURPLE);
@@ -78,33 +79,39 @@ void Simulation::Step(float DeltaTime) {
 
     // Motor Controls
     if (IsKeyDown(KEY_RIGHT)) {
+        //ApplyAngularImpulse(joints[0], motorImpulse);
         for (int i = 0; i < jointCount; i++) {
             ApplyAngularImpulse(joints[i], motorImpulse);
         }
     }
     if (IsKeyDown(KEY_LEFT)) {
+        //ApplyAngularImpulse(joints[1], -motorImpulse);
         for (int i = 0; i < jointCount; i++) {
             ApplyAngularImpulse(joints[i], -motorImpulse);
         }
     }
 
     if (IsKeyPressed(KEY_DOWN)) {
-        RigidBody* B = joints[1].bodyB;
-        ApplyAngularImpulse(joints[1], -B->angVel / B->invMOI);
+        //RigidBody* B = joints[1].bodyB;
+        //ApplyAngularImpulse(joints[1], -B->angVel / B->invMOI);
 
-        //for (int i = 0; i < jointCount; i++) {
-        //    RigidBody* B = joints[i].bodyB;
-        //    ApplyAngularImpulse(joints[i], -B->angVel/B->invMOI);
-        //}
+        for (int i = 0; i < jointCount; i++) {
+            RigidBody* B = joints[i].bodyB;
+            ApplyAngularImpulse(joints[i], -B->angVel/B->invMOI);
+        }
     }
 
     // Mouse Joint
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         for (int i = 0; i < rigidBodyCount; i++) {
-            if (d.IsWithinBody(bodies[i], GetMousePosition())) {
+            if (bodies[i]->isStatic) { continue; }
+
+            Vector2 mousePos = GetMousePosition() / scale;
+
+            if (d.IsWithinBody(bodies[i], mousePos)) {
                 mouseJoint.bodyA = bodies[i];
                 
-                Vector2 toMouse = GetMousePosition() - bodies[i]->pos;
+                Vector2 toMouse = mousePos - bodies[i]->pos;
                 mouseJoint.localA = Vector2Rotate(toMouse, -bodies[i]->rot);
                 break;
             }
@@ -114,9 +121,11 @@ void Simulation::Step(float DeltaTime) {
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         mouseJoint.bodyA = nullptr;
         mouseJoint.localA = { 0.f, 0.f };
+        mouseJoint.mousePos = { 0.f, 0.f };
     }
 
     if (mouseJoint.bodyA) {
+        mouseJoint.mousePos = GetMousePosition() / scale;
         for (int i = 0; i < s.iterations; i++) {
             s.SolveMouseJoint(mouseJoint, DeltaTime);
         }
@@ -218,31 +227,29 @@ void Simulation::Step(float DeltaTime) {
 
 void Simulation::Draw() {
     for (int i = 0; i < rigidBodyCount; i++) {
-        bodies[i]->Draw();
+        bodies[i]->Draw(scale);
     }
 
     for (int i = 0; i < jointCount; i++) {
-        RigidBody* A = joints[i].bodyA;
-        Vector2 pos = A->pos + Vector2Rotate(joints[i].localA, A->rot);
+        RigidBody* B = joints[i].bodyB;
+        Vector2 pos = B->pos + Vector2Rotate(joints[i].localB, B->rot);
 
-        DrawCircle(pos.x, pos.y, 5.f, BLACK);
+        DrawCircle(pos.x * scale, pos.y * scale, 2.f, BLACK);
     }
 
     if (mouseJoint.bodyA) {
         Vector2 pos = mouseJoint.bodyA->pos + Vector2Rotate(mouseJoint.localA, mouseJoint.bodyA->rot);
-        DrawCircle(pos.x, pos.y, 5.f, BLACK);
+        DrawCircle(pos.x * scale, pos.y * scale, 2.f, BLACK);
     }
 
     
     DrawVectorText(bodies[0]->pos, 20, 50, 20, BLUE);
     DrawVectorText(bodies[0]->vel, 20, 100, 20, BLUE);
-
     DrawText(std::to_string(bodies[0]->rot).c_str(), 20, 150, 20, BLUE);
     DrawText(std::to_string(bodies[0]->angVel).c_str(), 20, 200, 20, BLUE);
 
-    //DrawVectorText(bodies[1]->pos, 420, 50, 20, BLUE);
-    //DrawVectorText(bodies[1]->vel, 420, 100, 20, BLUE);
-
-    //DrawText(std::to_string(bodies[1]->rot).c_str(), 420, 150, 20, BLUE);
-    //DrawText(std::to_string(bodies[1]->angVel).c_str(), 420, 200, 20, BLUE);
+    DrawVectorText(bodies[1]->pos, 420, 50, 20, BLUE);
+    DrawVectorText(bodies[1]->vel, 420, 100, 20, BLUE);
+    DrawText(std::to_string(bodies[1]->rot).c_str(), 420, 150, 20, BLUE);
+    DrawText(std::to_string(bodies[1]->angVel).c_str(), 420, 200, 20, BLUE);
 }

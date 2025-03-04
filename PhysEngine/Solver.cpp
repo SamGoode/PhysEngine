@@ -409,7 +409,7 @@ void Solver::SolveMouseJoint(MouseJoint& mouseJoint, float DeltaTime) {
     Vector2 pointA = A->pos + radA;
 
     // Inverted
-    Vector2 biasVector = (GetMousePosition() - pointA) * biasFactor / DeltaTime;
+    Vector2 biasVector = (mouseJoint.mousePos - pointA) * biasFactor / DeltaTime;
     
 
     Vector2 relVel = (velA * -1) + (radPerpA * -angVelA);

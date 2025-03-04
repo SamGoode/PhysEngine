@@ -4,11 +4,11 @@ class Solver {
 public:
     int iterations = 4;
 
-    float biasSlop = 0.5f;
+    float biasSlop = 0.005f;
     float biasFactor = 0.1f;
 
-    float elasticity = 0.5f;
-    float friction = 0.98f;
+    float elasticity = 0.2f;
+    float friction = 0.95f;
 
 public:
     //Solver(int _iterations, float _biasSlop, float _biasFactor, float _elasticity, float _friction);

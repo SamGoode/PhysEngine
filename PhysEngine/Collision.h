@@ -29,4 +29,5 @@ struct MouseJoint {
     RigidBody* bodyA = nullptr;
 
     Vector2 localA = { 0.f, 0.f };
+    Vector2 mousePos = { 0.f, 0.f };
 };

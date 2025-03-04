@@ -14,8 +14,10 @@
 
 class Simulation {
 private:
-    Vector4 boundary = { 0.f, 0.f, 1800.f, 900.f };
-    Vector2 gravity = { 0.f, 200.f };
+    Vector2 gravity = { 0.f, 10.f };
+
+    float scale = 100.f; // pixels/m
+    Vector4 boundary = { 0.f, 0.f, 1800.f / scale, 900.f / scale };
 
     Detector d;
     Solver s;
@@ -30,7 +32,7 @@ private:
 
     MouseJoint mouseJoint;
 
-    float motorImpulse = 10000;
+    float motorImpulse = 1.5f;
 
 public:
     Simulation();

@@ -24,6 +24,7 @@ void RigidBody::Update(float DeltaTime) {
 
     angVel += angAcc * DeltaTime * 0.5;
     rot += angVel * DeltaTime;
+
     angAcc = 0.f;
 }
 
@@ -52,10 +53,10 @@ RigidRect::RigidRect(Vector2 _pos, float _mass, float _width, float _height, flo
     height = _height;
 }
 
-void RigidRect::Draw() {
+void RigidRect::Draw(float scale) {
     //Color color = BLUE;
     if (isStatic) { color = GREEN; }
-    DrawRectanglePro({ pos.x, pos.y, width, height }, { width / 2, height / 2 }, rot * 180 / PI, color);
+    DrawRectanglePro({ pos.x * scale, pos.y * scale, width * scale, height * scale }, { width * scale / 2, height * scale / 2 }, rot * 180 / PI, color);
 }
 
 
@@ -75,17 +76,17 @@ RigidCircle::RigidCircle(Vector2 _pos, float _mass, float _radius) {
     radius = _radius;
 }
 
-void RigidCircle::Draw() {
+void RigidCircle::Draw(float scale) {
     //Color color = PURPLE;
     if (isStatic) { color = GREEN; }
-    DrawCircle(pos.x, pos.y, radius, color);
+    DrawCircle(pos.x * scale, pos.y * scale, radius * scale, color);
 
     Vector2 radial = Vector2Rotate({ 1.f, 0.f }, rot) * radius;
 
     Vector2 startPos = pos - radial;
     Vector2 endPos = pos + radial;
 
-    DrawLine(startPos.x, startPos.y, endPos.x, endPos.y, BLACK);
+    DrawLine(startPos.x * scale, startPos.y * scale, endPos.x * scale, endPos.y * scale, BLACK);
 }
 
 
