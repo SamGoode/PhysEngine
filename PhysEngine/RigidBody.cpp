@@ -15,6 +15,7 @@ void RigidBody::ApplyAngularImpulse(float angularImpulse) {
     angVel += angularImpulse * invMOI;
 }
 
+
 void RigidBody::Update(float DeltaTime) {
     if (isStatic) { return; }
 
@@ -22,7 +23,7 @@ void RigidBody::Update(float DeltaTime) {
     pos += vel * DeltaTime;
     acc = { 0.f, 0.f };
 
-    angVel += angAcc * DeltaTime * 0.5;
+    angVel += angAcc * DeltaTime * 0.5f;
     rot += angVel * DeltaTime;
 
     angAcc = 0.f;
@@ -31,8 +32,8 @@ void RigidBody::Update(float DeltaTime) {
 void RigidBody::PrepUpdate(float DeltaTime) {
     if (isStatic) { return; }
 
-    vel += acc * DeltaTime * 0.5;
-    angVel += angAcc * DeltaTime * 0.5;
+    vel += acc * DeltaTime * 0.5f;
+    angVel += angAcc * DeltaTime * 0.5f;
 }
 
 
@@ -86,7 +87,7 @@ void RigidCircle::Draw(float scale) {
     Vector2 startPos = pos - radial;
     Vector2 endPos = pos + radial;
 
-    DrawLine(startPos.x * scale, startPos.y * scale, endPos.x * scale, endPos.y * scale, BLACK);
+    DrawLine((int)(startPos.x * scale), (int)(startPos.y * scale), (int)(endPos.x * scale), (int)(endPos.y * scale), BLACK);
 }
 
 

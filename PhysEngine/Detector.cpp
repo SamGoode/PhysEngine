@@ -178,10 +178,10 @@ void Detector::CheckCollisionRR(RigidBody* A, RigidBody* B) {
         Vector2 normals[8];
         for (int i = 0; i < 4; i++) {
             cornersA[i] = rectA->pos + Vector2Rotate(cornersA[i], rectA->rot);
-            normals[i] = Vector2Rotate({ 0.f, -1.f }, rectA->rot + (PI * 0.5 * i));
+            normals[i] = Vector2Rotate({ 0.f, -1.f }, rectA->rot + (PI * 0.5f * i));
 
             cornersB[i] = rectB->pos + Vector2Rotate(cornersB[i], rectB->rot);
-            normals[i + 4] = Vector2Rotate({ 0.f, -1.f }, rectB->rot + (PI * 0.5 * i));
+            normals[i + 4] = Vector2Rotate({ 0.f, -1.f }, rectB->rot + (PI * 0.5f * i));
         }
 
         int minOverlapIndexA = -1;

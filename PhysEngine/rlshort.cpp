@@ -13,3 +13,8 @@ bool operator==(const Vector2& a, const Vector2& b) { return abs(a.x - b.x) < 0.
 
 void DrawVectorText(Vector2 a, int posX, int posY, int fontSize, Color color) { DrawText((std::to_string(a.x) + ", " + std::to_string(a.y)).c_str(), posX, posY, fontSize, color); }
 void PrintVectorText(Vector2 a) { std::cout << "x: " << a.x << ", y: " << a.y << std::endl; }
+
+void DrawCircle(float centerX, float centerY, float radius, Color color) {
+	DrawCircle((int)centerX, (int)centerY, radius, color);
+}
+

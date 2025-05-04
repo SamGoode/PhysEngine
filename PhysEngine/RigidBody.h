@@ -1,22 +1,25 @@
 #pragma once
 
+#include <limits>
+
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
 
+
 class RigidBody {
 public:
-    bool isStatic;
+    bool isStatic = true;
 
-    Vector2 pos;
-    Vector2 vel;
-    Vector2 acc;
-    float invMass;
+    Vector2 pos = Vector2(FLT_MAX, FLT_MAX);
+    Vector2 vel = Vector2(0.f, 0.f);
+    Vector2 acc = Vector2(0.f, 0.f);
+    float invMass = 0.f;
 
-    float rot;
-    float angVel;
-    float angAcc;
-    float invMOI;
+    float rot = 0.f;
+    float angVel = 0.f;
+    float angAcc = 0.f;
+    float invMOI = 0.f;
 
     Color color = BLUE;
 
@@ -38,8 +41,8 @@ public:
 
 class RigidRect : public RigidBody {
 public:
-    float width;
-    float height;
+    float width = 0.f;
+    float height = 0.f;
 
 public:
     RigidRect() {}
@@ -52,7 +55,7 @@ public:
 
 class RigidCircle : public RigidBody {
 public:
-    float radius;
+    float radius = 0.f;
 
 public:
     RigidCircle() {}

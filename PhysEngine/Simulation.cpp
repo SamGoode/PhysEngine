@@ -60,10 +60,10 @@ void Simulation::InitialStep(float DeltaTime) {
 
         body->acc += gravity;
 
-        body->pos += body->vel * DeltaTime + body->acc * (DeltaTime * DeltaTime * 0.5);
+        body->pos += body->vel * DeltaTime + body->acc * (DeltaTime * DeltaTime * 0.5f);
         body->vel += body->acc * DeltaTime; //This assumes acceleration is the same next tick.
 
-        body->rot += body->angVel * DeltaTime + body->angAcc * (DeltaTime * DeltaTime * 0.5);
+        body->rot += body->angVel * DeltaTime + body->angAcc * (DeltaTime * DeltaTime * 0.5f);
         body->angVel += body->angAcc * DeltaTime;
     }
 }

@@ -284,7 +284,7 @@ void Solver::SolveFrictionPair(Collision& collision1, Collision& collision2) {
 
     if (abs(tangentLambda1) < 0.01f && abs(tangentLambda2) < 0.01f) { return; }
 
-    float maxFriction = abs(collision1.lambdaSum + collision2.lambdaSum) * friction * 0.5;
+    float maxFriction = abs(collision1.lambdaSum + collision2.lambdaSum) * friction * 0.5f;
 
     float combinedSum1 = std::clamp(collision1.tangentLambdaSum + tangentLambda1, -maxFriction, maxFriction);
     float combinedSum2 = std::clamp(collision2.tangentLambdaSum + tangentLambda2, -maxFriction, maxFriction);
